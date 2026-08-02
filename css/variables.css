@@ -38,5 +38,13 @@
     --transition-smooth: 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 
     /* Opacidad del Patrón Temático */
-    --pattern-opacity: 0.4;
+    --pattern-opacity: 0.03;
+
+    /* Paleta muestreada del mockup */
+    --color-cream-bg:    #F8E4B5;
+    --color-panel-right: #E4CB9E;
+    --color-brown-dark:  #3B2A1A;
+    --color-brown-mid:   #5B4123;
+    --color-brown-soft:  #7A5A3A;
+    --color-divider:     rgba(59, 42, 26, 0.25);
 }

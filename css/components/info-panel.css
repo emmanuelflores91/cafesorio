@@ -1,322 +1,131 @@
-/* css/components/info-panel.css — Panel de información del evento */
+/* css/components/info-panel.css — Panel de información del evento (venue-info) */
 
-/* ─── Contenedor article ─────────────────────────────────────────────────── */
-.info-panel {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-32);
+/* ─── Contenedor principal del panel derecho ─────────────────────────────── */
+.venue-info {
+    background-color: var(--color-panel-right);
     height: 100%;
-}
-
-/* ─── Header ─────────────────────────────────────────────────────────────── */
-.info-panel__header {
     display: flex;
     flex-direction: column;
-    gap: var(--space-8);
-}
-
-.info-panel__eyebrow {
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-48) var(--space-32);
+    gap: var(--space-32);
     font-family: var(--font-primary);
-    font-size: var(--text-xs);
-    font-weight: 500;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--color-accent);
-    margin: 0;
+    color: #5b4123;
 }
 
-.info-panel__title {
-    font-family: var(--font-secondary);
-    font-size: var(--text-2xl);
-    font-weight: 400;
-    color: var(--color-text-primary);
-    line-height: 1.15;
-    margin: 0;
+/* ─── Máquina de Estados para Máscaras CSS ───────────────────────────────── */
+.venue-icon-mask {
+    display: inline-block;
+    background-color: #5b4123;
+    -webkit-mask-image: var(--icon-url);
+    mask-image: var(--icon-url);
+    -webkit-mask-size: contain;
+    mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    mask-position: center;
 }
 
-.info-panel__subtitle {
-    font-family: var(--font-primary);
-    font-size: var(--text-sm);
-    color: var(--color-text-secondary);
-    margin: 0;
-    line-height: 1.6;
+/* ─── Logo principal del venue ───────────────────────────────────────────── */
+.venue-info__logo-wrapper {
+    margin-bottom: var(--space-16);
 }
 
-/* ─── Separador decorativo debajo del header ──────────────────────────────── */
-.info-panel__header::after {
-    content: '';
-    display: block;
-    width: 40px;
-    height: 1px;
-    background-color: var(--color-accent);
-    margin-top: var(--space-8);
+.venue-info__logo {
+    width: 240px;
+    height: auto;
+    max-height: 150px;
+    object-fit: contain;
 }
 
-/* ─── Body: secciones de información ─────────────────────────────────────── */
-.info-panel__body {
+/* ─── Contenedor de cuerpo (Alineación estructurada) ─────────────────────── */
+.venue-info__body {
     display: flex;
     flex-direction: column;
     gap: var(--space-24);
-}
-
-.info-panel__section {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-8);
-}
-
-/* ─── Headings de sección ────────────────────────────────────────────────── */
-.info-panel__heading {
-    font-family: var(--font-primary);
-    font-size: var(--text-xs);
-    font-weight: 600;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--color-text-secondary);
-    margin: 0;
-}
-
-/* ─── Definition list: filas de detalle ──────────────────────────────────── */
-.info-panel__details {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-4);
-    margin: 0;
-    padding: 0;
-}
-
-.info-panel__detail-row {
-    display: grid;
-    grid-template-columns: 6.5rem 1fr;
-    gap: var(--space-8);
-    align-items: baseline;
-}
-
-.info-panel__detail-label {
-    font-family: var(--font-primary);
-    font-size: var(--text-xs);
-    color: var(--color-text-secondary);
-    font-weight: 500;
-}
-
-.info-panel__detail-value {
-    font-family: var(--font-primary);
-    font-size: var(--text-sm);
-    color: var(--color-text-primary);
-    line-height: 1.5;
-}
-
-/* ─── Texto libre ────────────────────────────────────────────────────────── */
-.info-panel__text {
-    font-family: var(--font-primary);
-    font-size: var(--text-sm);
-    color: var(--color-text-primary);
-    line-height: 1.6;
-    margin: 0;
-}
-
-.info-panel__text--muted {
-    font-size: var(--text-xs);
-    color: var(--color-text-secondary);
+    width: 100%;
+    max-width: 300px;
 }
 
 /* ─── Dirección postal ───────────────────────────────────────────────────── */
-.info-panel__address {
-    font-style: normal;
-    font-family: var(--font-primary);
-    font-size: var(--text-sm);
-    color: var(--color-text-primary);
+.venue-info__address {
+    font-size: var(--text-base);
+    text-align: left;
     line-height: 1.6;
+    margin: 0;
 }
 
-/* ─── Footer: área del CTA ───────────────────────────────────────────────── */
-.info-panel__footer {
+/* ─── Navegación y Enlaces ───────────────────────────────────────────────── */
+.venue-info__links {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-24);
+    width: 100%;
+}
+
+.venue-link {
     display: flex;
     align-items: center;
-}
-
-/* ─── Botón primario ─────────────────────────────────────────────────────── */
-/*
- * Diseño minimalista: sin bordes pesados, sin sombras agresivas.
- * Usa el color de acento del sistema como borde sutil y fill en hover.
- */
-.btn-primary {
-    appearance: none;
-    -webkit-appearance: none;
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-8);
-    padding: var(--space-16) var(--space-24);
-    background-color: transparent;
-    color: var(--color-text-primary);
-    border: 1px solid var(--color-accent);
-    border-radius: 2px;
-    font-family: var(--font-primary);
-    font-size: var(--text-xs);
-    font-weight: 500;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    cursor: pointer;
-    transition:
-        background-color var(--transition-smooth),
-        color var(--transition-smooth),
-        border-color var(--transition-smooth);
-}
-
-.btn-primary__icon {
-    width: 16px;
-    height: 16px;
-    fill: currentColor;
-    flex-shrink: 0;
-    transition: fill var(--transition-smooth);
-}
-
-.btn-primary:hover,
-.btn-primary:focus-visible {
-    background-color: var(--color-accent);
-    color: var(--color-text-primary);
-    border-color: var(--color-accent);
-    outline: none;
-}
-
-.btn-primary:focus-visible {
-    box-shadow: 0 0 0 3px rgba(229, 213, 197, 0.5);
-}
-
-.btn-primary:active {
-    background-color: var(--color-bg-secondary);
-}
-
-/* ─── Botón secundario (ghost) ───────────────────────────────────────────────
- * Jerarquía visual inferior al .btn-primary.
- * Fondo siempre transparente; borde y texto en color-text-primary con
- * opacidad reducida para no competir con el CTA principal.
- * El ícono SVG hereda color via currentColor: fill: currentColor en el SVG.
- * ─────────────────────────────────────────────────────────────────────────── */
-.btn-secondary {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-8);
-    padding: var(--space-8) var(--space-16);
-    background-color: transparent;
-    color: var(--color-text-primary);
-    border: 1px solid rgba(26, 26, 26, 0.25);   /* color-text-primary a 25% */
-    border-radius: 2px;
-    font-family: var(--font-primary);
-    font-size: var(--text-xs);
-    font-weight: 500;
-    letter-spacing: 0.10em;
-    text-transform: uppercase;
-    text-decoration: none;          /* es un <a>, eliminar subrayado nativo */
-    cursor: pointer;
-    align-self: flex-start;         /* no se estira al 100% del contenedor */
-    transition:
-        background-color var(--transition-smooth),
-        border-color var(--transition-smooth),
-        color var(--transition-smooth);
-}
-
-.btn-secondary:hover,
-.btn-secondary:focus-visible {
-    background-color: var(--color-bg-secondary);
-    border-color: var(--color-text-primary);
-    color: var(--color-text-primary);
-    outline: none;
-}
-
-.btn-secondary:focus-visible {
-    box-shadow: 0 0 0 3px rgba(26, 26, 26, 0.15);
-}
-
-.btn-secondary:active {
-    background-color: var(--color-accent);
-    border-color: var(--color-accent);
-}
-
-/* Ícono SVG del botón secundario: hereda color del texto */
-.btn-secondary__icon {
-    width: 1rem;        /* relativo: escala con el font-size del contexto */
-    height: 1rem;
-    flex-shrink: 0;
-    pointer-events: none;
-    /* fill: currentColor declarado directamente en el SVG inline */
+    gap: var(--space-16);
+    text-decoration: none;
+    color: inherit;
+    font-size: var(--text-base);
     transition: opacity var(--transition-smooth);
 }
 
-/* Variante Instagram: hover con degradado de marca (subtle) */
-.btn-secondary--instagram:hover,
-.btn-secondary--instagram:focus-visible {
-    background: linear-gradient(
-        135deg,
-        rgba(253, 244, 227, 0.6) 0%,
-        rgba(252, 220, 200, 0.6) 50%,
-        rgba(220, 180, 220, 0.3) 100%
-    );
-    border-color: rgba(180, 100, 160, 0.4);
-    color: var(--color-text-primary);
+.venue-link:hover,
+.venue-link:focus-visible {
+    opacity: 0.7;
+    outline: none;
 }
 
-/* ─── Hashtag del evento ─────────────────────────────────────────────────── */
-.info-panel__hashtag {
-    font-family: var(--font-secondary);   /* serif para distinción tipográfica */
-    font-weight: 400;
-    font-size: var(--text-sm);
-    color: var(--color-text-primary);
-    font-style: italic;
-    letter-spacing: 0.02em;
+.venue-link__icon {
+    width: 26px;
+    height: 26px;
+    flex-shrink: 0;
 }
 
-/* ─── Mapa ilustrativo ───────────────────────────────────────────────────── */
-.info-panel__map {
-    margin-top: auto;       /* empuja el mapa hacia el fondo en desktop */
-    overflow: hidden;
-    border-radius: 4px;
+/* ─── Separador decorativo ───────────────────────────────────────────────── */
+.venue-info__divider {
+    width: 60%;
+    border: none;
+    border-bottom: 1px solid var(--color-divider);
+    margin: 0;
 }
 
-.info-panel__map-picture {
-    display: block;
-    width: 100%;
-    line-height: 0;
+/* ─── Call to Action (Formulario) ────────────────────────────────────────── */
+.venue-info__form-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-16);
+    text-align: center;
+    line-height: 1.4;
 }
 
-/*
- * cursor: pointer + transición de opacidad y escala
- * indican claramente que la imagen es interactiva.
- */
-.info-panel__map-img {
-    display: block;
-    width: 100%;
-    height: auto;
-    object-fit: cover;
-    border-radius: 4px;
-    cursor: pointer;
-    opacity: 0.9;
-    transition:
-        opacity var(--transition-smooth),
-        transform var(--transition-smooth);
+.venue-info__form-section p {
+    margin: 0;
+    font-size: var(--text-lg);
+    line-height: 1.4;
 }
 
-.info-panel__map-img:hover {
-    opacity: 1;
-    transform: scale(1.02);
+.venue-form-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-8);
+    transition: transform var(--transition-smooth);
 }
 
-/* ─── Responsive: Mobile (< 1024px) ──────────────────────────────────────── */
-@media (max-width: 1023px) {
-    .info-panel__title {
-        font-size: var(--text-xl);
-    }
+.venue-form-btn__icon {
+    width: 44px;
+    height: 44px;
+}
 
-    .info-panel__detail-row {
-        grid-template-columns: 5.5rem 1fr;
-    }
-
-    .info-panel__map {
-        margin-top: 0;
-    }
-
-    /* Botón secundario: padding algo más reducido en mobile */
-    .btn-secondary {
-        padding: var(--space-8) var(--space-16);
-    }
+.venue-form-btn:hover,
+.venue-form-btn:focus-visible {
+    transform: scale(1.15);
+    outline: none;
 }

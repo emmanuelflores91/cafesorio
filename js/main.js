@@ -9,13 +9,17 @@ const init = () => {
     new IntroController('#app-state-cover', '#app-state-intro', '#app-state-main', '.comic-track', '#btn-start-comic');
 
     // ── Galería fotográfica ────────────────────────────────────────────────
-    const galleryElement = document.querySelector('.gallery');
+    const galleryElement = document.querySelector('.gallery-grid');
     if (galleryElement) {
         new GalleryController(galleryElement);
     }
 
-    // ── Mapa ilustrativo ───────────────────────────────────────────────────
-    new MapHandler('#btn-open-map', '#map-illustration');
+    // ── Mapa ilustrativo (Suspendido temporalmente por carencia de nodos) ──
+    // new MapHandler('#btn-open-map', '#map-illustration');
 };
 
-document.addEventListener('DOMContentLoaded', init);
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+} else {
+    init();
+}

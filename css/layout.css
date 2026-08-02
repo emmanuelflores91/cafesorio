@@ -5,12 +5,17 @@
  * Flujo de bloque estándar (Stacking).
  * Galería en el tercio superior, seguido del panel de información.
  */
+body {
+    position: relative;
+    background-color: var(--color-cream-bg);
+}
+
 .layout-split {
     display: flex;
     flex-direction: column;
     width: 100%;
     min-height: 100vh;
-    background-color: var(--color-bg-primary);
+    background-color: transparent;
 }
 
 /* Galería: tercio superior en Mobile */
@@ -48,27 +53,32 @@
     .layout-split__info {
         width: 40vw;
         height: 100vh;
-        padding: var(--space-64) var(--space-48);
-        overflow-y: auto;
+        padding: 0;
+        overflow: hidden;
     }
 }
 
 /* ─── Capa de fondo global (vi-0: portada) ───────────────────────────────────
- * Pseudo-elemento fijo bajo todo el contenido.
- * z-index: -1  → por detrás de todas las capas.
- * pointer-events: none → no intercepta clicks ni gestos.
+ * Pseudo-elemento fijo proyectado sobre el viewport detrás del contenido.
+ * z-index: 0 → Fondo real, no superposición.
+ * pointer-events: none → Anulación de intercepción de matriz de eventos.
  * ─────────────────────────────────────────────────────────────────────────── */
 body::before {
     content: '';
     position: fixed;
     inset: 0;
-    z-index: -1;
+    z-index: 0;
     pointer-events: none;
     background-image: url('../assets/images/vi-0-web.webp');
-    background-repeat: no-repeat;
-    background-size: cover;
-    background-position: center;
-    opacity: 1;
+    background-repeat: repeat;
+    background-size: auto;
+    background-position: top left;
+    opacity: var(--pattern-opacity);
+}
+
+body > * {
+    position: relative;
+    z-index: 1;
 }
 
 /* ─── Utilidad de ocultación ─────────────────────────────────────────────── */
