@@ -1,0 +1,210 @@
+/* css/components/gallery.css — Galería fotográfica inmersiva + controles */
+
+/* ─── Contenedor principal ───────────────────────────────────────────────── */
+.gallery {
+    position: relative;   /* ancla de posicionamiento para los controles */
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;     /* recorta el track fuera del viewport */
+    background-color: var(--color-bg-primary);
+}
+
+/* ─── Track: contexto de apilamiento para cross-fade ────────────────────── */
+.gallery__track {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+/* ─── Slide individual ───────────────────────────────────────────────────── */
+/*
+ * Todos los slides ocupan el mismo espacio absoluto.
+ * La visibilidad se controla exclusivamente via opacity.
+ */
+.gallery__slide {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    z-index: 0;
+    transition: opacity 0.6s ease-in-out;
+}
+
+/* ─── Estado activo del slide ────────────────────────────────────────────── */
+.gallery__slide.is-active {
+    opacity: 1;
+    z-index: 1;
+}
+
+/* ─── Imagen (dentro de cada slide) ─────────────────────────────────────── */
+.gallery__picture,
+.gallery__image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+}
+
+/* ─── Caption ────────────────────────────────────────────────────────────── */
+.gallery__caption {
+    position: absolute;
+    bottom: var(--space-16);
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: var(--font-primary);
+    font-size: var(--text-xs);
+    color: #ffffff;
+    background-color: rgba(0, 0, 0, 0.35);
+    padding: var(--space-4) var(--space-16);
+    border-radius: 100px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    pointer-events: none;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+}
+
+/* ─── Controles: nav (flechas prev / next) ───────────────────────────────── */
+.gallery__controls {
+    position: absolute;
+    inset: 0;                       /* ocupa todo el .gallery */
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    pointer-events: none;           /* la nav no captura eventos… */
+    z-index: 10;
+}
+
+/* ─── Botones de flecha ──────────────────────────────────────────────────── */
+.gallery__btn {
+    /* Restablecer aspecto nativo */
+    appearance: none;
+    -webkit-appearance: none;
+    border: none;
+    cursor: pointer;
+    background: rgba(255, 255, 255, 0.18);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    border-radius: 50%;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    pointer-events: all;            /* …pero los botones sí capturan */
+    transition:
+        background var(--transition-smooth),
+        transform var(--transition-smooth),
+        opacity var(--transition-smooth);
+
+    /* ── Mobile (por defecto): compacto y sutil ── */
+    width: 36px;
+    height: 36px;
+    margin: 0 var(--space-8);
+    opacity: 0.75;
+}
+
+.gallery__btn--prev { margin-left: var(--space-8); }
+.gallery__btn--next { margin-right: var(--space-8); }
+
+/* SVG del ícono de flecha */
+.gallery__btn-icon {
+    width: 18px;
+    height: 18px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    flex-shrink: 0;
+    pointer-events: none;
+}
+
+/* Estado hover/focus de los botones */
+.gallery__btn:hover,
+.gallery__btn:focus-visible {
+    background: rgba(255, 255, 255, 0.38);
+    opacity: 1;
+    transform: scale(1.08);
+    outline: none;
+}
+
+.gallery__btn:focus-visible {
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.6);
+}
+
+.gallery__btn:active {
+    transform: scale(0.95);
+}
+
+/* ─── Indicadores: dots ──────────────────────────────────────────────────── */
+.gallery__dots {
+    position: absolute;
+    bottom: var(--space-16);
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: var(--space-8);
+    pointer-events: none;
+    z-index: 10;
+}
+
+/* Dot individual (generado por GalleryController.js) */
+.gallery__dot {
+    display: block;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.5);
+    border: none;
+    cursor: pointer;
+    flex-shrink: 0;
+    pointer-events: all;
+    transition:
+        background-color var(--transition-smooth),
+        transform var(--transition-smooth);
+
+    /* ── Mobile: pequeño ── */
+    width: 6px;
+    height: 6px;
+}
+
+.gallery__dot[aria-selected="true"],
+.gallery__dot--active {
+    background-color: #ffffff;
+    transform: scale(1.35);
+}
+
+.gallery__dot:hover {
+    background-color: rgba(255, 255, 255, 0.85);
+}
+
+/* ─── Desktop (≥ 1024px): tamaño cómodo, área de clic generosa ──────────── */
+@media (min-width: 1024px) {
+
+    /* Botones de flecha */
+    .gallery__btn {
+        width: 52px;
+        height: 52px;
+        margin: 0 var(--space-16);
+        opacity: 0.85;
+        background: rgba(255, 255, 255, 0.14);
+    }
+
+    .gallery__btn--prev { margin-left: var(--space-24); }
+    .gallery__btn--next { margin-right: var(--space-24); }
+
+    .gallery__btn-icon {
+        width: 24px;
+        height: 24px;
+        stroke-width: 2;
+    }
+
+    /* Dots */
+    .gallery__dot {
+        width: 8px;
+        height: 8px;
+    }
+}

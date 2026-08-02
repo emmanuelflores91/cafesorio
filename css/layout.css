@@ -1,0 +1,384 @@
+/* css/layout.css — Arquitectura Split-Screen (Desktop) / Stacking (Mobile) */
+
+/*
+ * Mobile-first (Viewport < 1024px):
+ * Flujo de bloque estándar (Stacking).
+ * Galería en el tercio superior, seguido del panel de información.
+ */
+.layout-split {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-height: 100vh;
+    background-color: var(--color-bg-primary);
+}
+
+/* Galería: tercio superior en Mobile */
+.layout-split__gallery {
+    width: 100%;
+    height: 33.333vh;
+    overflow: hidden;
+}
+
+/* Panel de información: flujo debajo de la galería en Mobile */
+.layout-split__info {
+    width: 100%;
+    padding: var(--space-32) var(--space-24);
+}
+
+/*
+ * Desktop (Viewport ≥ 1024px):
+ * Patrón Split-Screen.
+ * Panel Izquierdo (60vw): Galería fotográfica inmersiva.
+ * Panel Derecho (40vw): Contenedor de información.
+ * Sin scroll vertical global.
+ */
+@media (min-width: 1024px) {
+    .layout-split {
+        flex-direction: row;
+        height: 100vh;
+        overflow: hidden;
+    }
+
+    .layout-split__gallery {
+        width: 60vw;
+        height: 100vh;
+    }
+
+    .layout-split__info {
+        width: 40vw;
+        height: 100vh;
+        padding: var(--space-64) var(--space-48);
+        overflow-y: auto;
+    }
+}
+
+/* ─── Capa de fondo global (vi-0: portada) ───────────────────────────────────
+ * Pseudo-elemento fijo bajo todo el contenido.
+ * z-index: -1  → por detrás de todas las capas.
+ * pointer-events: none → no intercepta clicks ni gestos.
+ * ─────────────────────────────────────────────────────────────────────────── */
+body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-image: url('../assets/images/vi-0-web.webp');
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+    opacity: 1;
+}
+
+/* ─── Utilidad de ocultación ─────────────────────────────────────────────── */
+.is-hidden {
+    display: none !important;
+}
+
+/* ─── Estado inicial: secuencia de viñetas cómicas ───────────────────────────────────────
+ * Ocupa el viewport completo y centra el track de slides.
+ * ────────────────────────────────────────────────────────────────────────────── */
+.comic-sequence {
+    width: 100vw;
+    height: 100vh;
+    display: grid;
+    /* Mutación: Grid 3×3 — columna/fila central envuelve el track */
+    grid-template-columns: 1fr auto 1fr;
+    grid-template-rows: 1fr auto 1fr;
+    column-gap: 30px; /* Mutación: Reducción de interpolación espacial a 30px exactos */
+    /* Mutación: Reducción exclusiva del gap vertical a 18px para acercar los indicadores */
+    row-gap: 18px;
+    align-items: center;
+    justify-items: center;
+    position: relative;
+    z-index: 50;
+    overflow: hidden;
+}
+
+/* ─── Track: contexto de apilamiento para las viñetas ─────────────────────────── */
+.comic-track {
+    grid-column: 2;
+    grid-row: 2;
+    position: relative;
+    /* Mutación: Recálculo del Bounding Box.
+       Se sustraen 46px del eje Y (18px top gap + 18px bottom gap + 10px dot height)
+       para proyectar el contenedor envolvente exacto. El eje X se mantiene en 188px. */
+    width: min(calc(100vw - 188px), calc((100vh - 46px) * (1920 / 1285)));
+    aspect-ratio: 1920 / 1285;
+    cursor: pointer;
+}
+
+/* ─── Slide individual de la secuencia intro ─────────────────────────────────────────── */
+.comic-slide {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    /* Mutación: Extrusión volumétrica al contenedor matemáticamente exacto */
+    object-fit: fill;
+    opacity: 0;
+    /* Mutación: Centrado delegado al Grid; traslación de eje X simplificada */
+    transform: translateX(150vw);
+    transition: transform 0.6s cubic-bezier(0.25, 0.8, 0.25, 1), opacity 0.6s ease-in-out;
+    z-index: 0;
+    border: none;
+    /* Mutación: +30% canal alfa (0.45→0.59), +10% expansión (35px blur, 3px spread) */
+    box-shadow: 0 8px 35px 3px rgba(0, 0, 0, 0.59);
+}
+
+/* ─── Estado activo del slide (Viewport central) ──────────────────────────────── */
+.comic-slide.is-active {
+    transform: translateX(0);
+    opacity: 1;
+    z-index: 1;
+}
+
+/* ─── Estado pasado del slide (Búfer izquierdo off-screen) ──────────────────────── */
+.comic-slide.is-past {
+    transform: translateX(-150vw);
+    opacity: 0;
+    z-index: 0;
+}
+
+/* ─── Controles laterales de navegación ──────────────────────────────────────────── */
+.comic-controls {
+    /* Mutación: Proyección de hijos directos sobre la grilla padre */
+    display: contents;
+}
+
+.comic-btn {
+    appearance: none;
+    -webkit-appearance: none;
+    border: none;
+    cursor: pointer;
+    background: transparent;
+    color: #5B4123;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: all;
+    transition: transform var(--transition-smooth), opacity var(--transition-smooth);
+    width: 64px;
+    height: 64px;
+    margin: 0; /* Depuración de margen estático obsoleto */
+    opacity: 0.8;
+}
+
+.comic-btn--prev {
+    grid-column: 1;
+    grid-row: 2;
+    justify-self: end;
+}
+
+.comic-btn--next {
+    grid-column: 3;
+    grid-row: 2;
+    justify-self: start;
+}
+
+.comic-btn:hover,
+.comic-btn:focus-visible {
+    background: transparent;
+    opacity: 1;
+    transform: scale(1.15);
+    outline: none;
+}
+
+.comic-btn:disabled {
+    opacity: 0; /* Mutación: Ocultamiento total en umbrales de navegación */
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.comic-btn-icon {
+    width: 48px; /* Mutación: Escalamiento del vector */
+    height: 48px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.5; /* Mutación: Reducción del peso del trazo */
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    pointer-events: none;
+}
+
+/* ─── Indicadores de posición (Dots) ─────────────────────────────────────────── */
+.comic-dots {
+    grid-column: 2;
+    grid-row: 3;
+    align-self: start;
+    /* Mutación: Depuración de anclajes absolutos; eje posicional delegado al Grid */
+    position: static;
+    transform: none;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    pointer-events: none;
+    z-index: 10;
+}
+
+.comic-dot {
+    display: block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: #5B4123;
+    border: none;
+    cursor: pointer;
+    pointer-events: all;
+    opacity: 0.35;
+    transition: opacity var(--transition-smooth), transform var(--transition-smooth);
+}
+
+.comic-dot:hover {
+    opacity: 0.7;
+}
+
+.comic-dot.is-active {
+    opacity: 1;
+    transform: scale(1.3);
+}
+
+/* ─── Estado de cubierta (cover-sequence) ─────────────────────────────── */
+.cover-sequence {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    z-index: 50;
+    overflow: hidden;
+}
+
+/* Contenedor interno: limita el ancho del bloque editorial */
+.cover-sequence__inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /* centrado horizontal de hijos flex */
+    gap: 1.5rem;
+    max-width: 720px;
+    /* Mutación: reducción para forzar wrapping de texto */
+    width: 90%;
+    padding: 2rem;
+    text-align: center;
+    /* QA: centrado global de todos los textos hijos */
+}
+
+/* Subtítulo superior — Arimo, mayúsculas, letter-spacing amplio */
+.cover-sequence__eyebrow {
+    font-family: 'Arimo', sans-serif;
+    font-weight: 700;
+    font-size: 1.1rem;
+    /* QA: +30% ajuste auditoría */
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: rgba(74, 60, 52, 0.80);
+    /* Mutación: alfa 30% — previo: #4a3c34 */
+    margin: 0;
+    text-align: center;
+}
+
+/* Separador horizontal */
+.cover-sequence__divider {
+    width: 30%;
+    /* QA morado: reducido al 30% del contenedor */
+    border: none;
+    border-bottom: 1.5px solid rgba(74, 60, 52, 0.3);
+    margin: 0 auto;
+    /* QA morado: centrado absoluto */
+}
+
+/* Título principal — Cormorant Garamond, tono azul verdoso */
+.cover-sequence__title {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 400;
+    /* Mutación: 300 → 400 */
+    font-size: clamp(1.6rem, 3.5vw, 2.6rem);
+    line-height: 1.3;
+    color: #1a454b;
+    margin: 0;
+    text-align: center;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Capitular: letra J de mayor escala visual */
+.cover-sequence__dropcap {
+    font-size: 1.55em;
+    line-height: 0.85;
+    font-weight: 700;
+    /* QA azul: excepcionalmente negrita */
+    font-style: normal;
+    /* QA azul: sin cursiva */
+    display: inline-block;
+    vertical-align: baseline;
+    color: #1a454b;
+}
+
+/* Párrafo secundario — Cormorant Garamond */
+.cover-sequence__subtitle {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 400;
+    /* Mutación: 300 → 400 */
+    font-size: clamp(1.6rem, 3.5vw, 2.6rem);
+    line-height: 1.4;
+    /* Mutación: 1.75 → 1.40 (-20%) */
+    color: #1a454b;
+    margin: 0;
+    text-align: center;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Botón CTA — Arimo, mayúsculas, letter-spacing amplio */
+.cover-sequence__cta {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 3rem;
+    padding: 0;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: 'Arimo', sans-serif;
+    font-weight: 700;
+    font-size: 1.1rem;
+    /* QA: ajuste auditoría */
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(74, 60, 52, 0.80);
+    /* Mutación: rgba sin herencia al nodo img — previo: #4a3c34 */
+    text-align: center;
+    transition: opacity 0.2s ease;
+}
+
+.cover-sequence__cta:hover {
+    opacity: 0.65;
+}
+
+/* Ícono del botón CTA (Instancia de imagen rasterizada) */
+.cover-sequence__cta-icon {
+    width: 57px;
+    /* Mutación: 38px → 57px (+50%) */
+    height: 57px;
+    /* Mutación: 38px → 57px (+50%) */
+    object-fit: contain;
+    flex-shrink: 0;
+    animation: cover-pulse 2s ease-in-out infinite;
+    /* Mutación: bounce → pulse */
+}
+
+@keyframes cover-pulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.15);
+    }
+}

@@ -1,0 +1,42 @@
+/* css/variables.css — Design System & Design Tokens */
+
+:root {
+    /* Paleta Base (Placeholder - Extraer de PDF) */
+    --color-bg-primary: #FFFFFF;
+    --color-bg-secondary: #F8F9FA;
+    /* Para estados hover o separaciones sutiles */
+    --color-text-primary: #1A1A1A;
+    --color-text-secondary: #4A4A4A;
+    --color-accent: #E5D5C5;
+    /* Tono derivado del café/madera para acentos */
+
+    /* Tipografía */
+    --font-primary: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    /* Elegante, sans-serif */
+    --font-secondary: 'Georgia', serif;
+    /* Para citas o énfasis muy puntuales */
+
+    /* Escala Tipográfica (Rem-based, asumiendo base 16px) */
+    --text-xs: 0.75rem;
+    --text-sm: 0.875rem;
+    --text-base: 1rem;
+    --text-lg: 1.25rem;
+    --text-xl: 1.5rem;
+    --text-2xl: 2.25rem;
+
+    /* Espaciado (Sistema de 8px) */
+    --space-2: 0.125rem;
+    --space-4: 0.25rem;
+    --space-8: 0.5rem;
+    --space-16: 1rem;
+    --space-24: 1.5rem;
+    --space-32: 2rem;
+    --space-48: 3rem;
+    --space-64: 4rem;
+
+    /* Transiciones */
+    --transition-smooth: 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+
+    /* Opacidad del Patrón Temático */
+    --pattern-opacity: 0.4;
+}
