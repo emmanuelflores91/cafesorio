@@ -90,24 +90,29 @@
 
         <!-- Layout Split-Screen: Desktop 60vw/40vw -->
         <main class="layout-split">
-            
+
             <!-- Panel Izquierdo (60vw): Galería fotográfica inmersiva en Grid -->
             <section class="layout-split__gallery" aria-label="Galería fotográfica del predio">
                 <figure class="gallery-grid">
-                    
+
                     <div class="gallery-grid__track" aria-live="polite">
-                        <img class="gallery-grid__slide is-active" src="assets/images/chacra-8.jpg" alt="Vista exterior 1" draggable="false">
-                        <img class="gallery-grid__slide" src="assets/images/chacra-10.jpg" alt="Vista exterior 2" draggable="false">
-                        <img class="gallery-grid__slide" src="assets/images/chacra-4.png" alt="Vista exterior 3" draggable="false">
+                        <img class="gallery-grid__slide is-active" src="assets/images/chacra-8.jpg"
+                            alt="Vista exterior 1" draggable="false">
+                        <img class="gallery-grid__slide" src="assets/images/chacra-10.jpg" alt="Vista exterior 2"
+                            draggable="false">
+                        <img class="gallery-grid__slide" src="assets/images/chacra-4.png" alt="Vista exterior 3"
+                            draggable="false">
                     </div>
 
                     <nav class="gallery-grid__controls" aria-label="Controles de la galería">
-                        <button class="comic-btn comic-btn--prev gallery-btn--prev" type="button" aria-label="Imagen anterior">
+                        <button class="comic-btn comic-btn--prev gallery-btn--prev" type="button"
+                            aria-label="Imagen anterior">
                             <svg class="comic-btn-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
                                 <polyline points="15 18 9 12 15 6" />
                             </svg>
                         </button>
-                        <button class="comic-btn comic-btn--next gallery-btn--next" type="button" aria-label="Imagen siguiente">
+                        <button class="comic-btn comic-btn--next gallery-btn--next" type="button"
+                            aria-label="Imagen siguiente">
                             <svg class="comic-btn-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
                                 <polyline points="9 18 15 12 9 6" />
                             </svg>
@@ -123,11 +128,12 @@
 
             <!-- Panel Derecho (40vw): Contenedor de información con degradado -->
             <section class="layout-split__info venue-info" aria-label="Información del evento">
-                
+
                 <div class="venue-info__logo-wrapper">
-                    <img src="assets/images/la_milonga.png" class="venue-info__logo" alt="Logo Chacra La Milonga" draggable="false">
+                    <img src="assets/images/la_milonga.png" class="venue-info__logo" alt="Logo Chacra La Milonga"
+                        draggable="false">
                 </div>
-                
+
                 <div class="venue-info__body">
                     <p class="venue-info__address">
                         Leandro N. Alem S/N, Esteban Echeverría,<br>
@@ -135,16 +141,22 @@
                     </p>
 
                     <nav class="venue-info__links" aria-label="Enlaces logísticos">
-                        <a href="https://maps.app.goo.gl/bbEqqj2s4zFuCF2G6" class="venue-link" target="_blank" rel="noopener noreferrer">
-                            <div class="venue-icon-mask venue-link__icon" style="--icon-url: url('assets/images/ubicacion.png');"></div>
+                        <a href="https://maps.app.goo.gl/bbEqqj2s4zFuCF2G6" class="venue-link" target="_blank"
+                            rel="noopener noreferrer">
+                            <div class="venue-icon-mask venue-link__icon"
+                                style="--icon-url: url('assets/images/ubicacion.png');"></div>
                             <span>Cómo llegar</span>
                         </a>
-                        <a href="https://www.instagram.com/chacra.lamilonga/" class="venue-link" target="_blank" rel="noopener noreferrer">
-                            <div class="venue-icon-mask venue-link__icon" style="--icon-url: url('assets/images/instagram.png');"></div>
+                        <a href="https://www.instagram.com/chacra.lamilonga/" class="venue-link" target="_blank"
+                            rel="noopener noreferrer">
+                            <div class="venue-icon-mask venue-link__icon"
+                                style="--icon-url: url('assets/images/instagram.png');"></div>
                             <span>Ver en Instagram</span>
                         </a>
-                        <a href="https://www.youtube.com" class="venue-link" target="_blank" rel="noopener noreferrer">
-                            <div class="venue-icon-mask venue-link__icon" style="--icon-url: url('assets/images/camara.png');"></div>
+                        <a href="https://www.youtube.com/watch?v=p4I1z1CKYNY" class="venue-link" target="_blank"
+                            rel="noopener noreferrer">
+                            <div class="venue-icon-mask venue-link__icon"
+                                style="--icon-url: url('assets/images/camara.png');"></div>
                             <span>Recorrer el predio</span>
                         </a>
                     </nav>
@@ -154,8 +166,11 @@
 
                 <div class="venue-info__form-section">
                     <p>Formulario de asistencia y<br>consideraciones alimentarias</p>
-                    <a href="https://forms.google.com" target="_blank" rel="noopener noreferrer" class="venue-form-btn" aria-label="Abrir formulario de asistencia">
-                        <div class="venue-icon-mask venue-form-btn__icon" style="--icon-url: url('assets/images/formulario.png');"></div>
+                    <a href="https://docs.google.com/forms/d/e/1FAIpQLSfBRKIAf1oDwaejlKdOXCIsbNqcPuWyjJV8ddQSY6-H5wIhkg/viewform"
+                        target="_blank" rel="noopener noreferrer" class="venue-form-btn"
+                        aria-label="Abrir formulario de asistencia">
+                        <div class="venue-icon-mask venue-form-btn__icon"
+                            style="--icon-url: url('assets/images/formulario.png');"></div>
                     </a>
                 </div>
 
@@ -164,6 +179,9 @@
         </main>
     </div><!-- /#app-state-main -->
 
+    <button id="btn-go-home" class="btn-inicio is-hidden" type="button" aria-label="Volver al inicio">
+        <div class="venue-icon-mask btn-inicio__icon" style="--icon-url: url('assets/images/inicio.png');"></div>
+    </button>
 </body>
 
 </html>

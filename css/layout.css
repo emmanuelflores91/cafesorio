@@ -115,9 +115,8 @@ body>* {
     grid-row: 2;
     position: relative;
     /* Mutación: Recálculo del Bounding Box.
-       Se sustraen 46px del eje Y (18px top gap + 18px bottom gap + 10px dot height)
-       para proyectar el contenedor envolvente exacto. El eje X se mantiene en 188px. */
-    width: min(calc(100vw - 188px), calc((100vh - 46px) * (1920 / 1285)));
+       Se restan 100px del eje Y para dejar exactamente 50px de margen superior e inferior. */
+    width: min(calc(100vw - 188px), calc((100vh - 100px) * (1920 / 1285)));
     aspect-ratio: 1920 / 1285;
     cursor: pointer;
 }
@@ -130,10 +129,10 @@ body>* {
     height: 100%;
     /* Mutación: Extrusión volumétrica al contenedor matemáticamente exacto */
     object-fit: fill;
-    opacity: 0;
+    opacity: 1;
     /* Mutación: Centrado delegado al Grid; traslación de eje X simplificada */
     transform: translateX(150vw);
-    transition: transform 0.6s cubic-bezier(0.25, 0.8, 0.25, 1), opacity 0.6s ease-in-out;
+    transition: transform 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
     z-index: 0;
     border: none;
     /* Mutación: +30% canal alfa (0.45→0.59), +10% expansión (35px blur, 3px spread) */
@@ -143,14 +142,12 @@ body>* {
 /* ─── Estado activo del slide (Viewport central) ──────────────────────────────── */
 .comic-slide.is-active {
     transform: translateX(0);
-    opacity: 1;
     z-index: 1;
 }
 
 /* ─── Estado pasado del slide (Búfer izquierdo off-screen) ──────────────────────── */
 .comic-slide.is-past {
     transform: translateX(-150vw);
-    opacity: 0;
     z-index: 0;
 }
 
@@ -224,6 +221,8 @@ body>* {
     grid-column: 2;
     grid-row: 3;
     align-self: start;
+    margin-top: 2px;
+    /* Centrado perfecto en la franja de 50px (18px de gap + 2px = 20px arriba del dot de 10px) */
     /* Mutación: Depuración de anclajes absolutos; eje posicional delegado al Grid */
     position: static;
     transform: none;
@@ -291,7 +290,7 @@ body>* {
     /* QA: +30% ajuste auditoría */
     letter-spacing: 0.22em;
     text-transform: uppercase;
-    color: rgba(74, 60, 52, 0.80);
+    color: #5B4123;
     /* Mutación: alfa 30% — previo: #4a3c34 */
     margin: 0;
     text-align: center;
@@ -302,7 +301,7 @@ body>* {
     width: 30%;
     /* QA morado: reducido al 30% del contenedor */
     border: none;
-    border-bottom: 1.5px solid rgba(74, 60, 52, 0.3);
+    border-bottom: 1.5px solid rgba(91, 65, 35, 0.8);
     margin: 0 auto;
     /* QA morado: centrado absoluto */
 }
@@ -314,7 +313,7 @@ body>* {
     /* Mutación: 300 → 400 */
     font-size: clamp(1.6rem, 3.5vw, 2.6rem);
     line-height: 1.3;
-    color: #1a454b;
+    color: #0D5A67;
     margin: 0;
     text-align: center;
     -webkit-font-smoothing: antialiased;
@@ -331,7 +330,7 @@ body>* {
     /* QA azul: sin cursiva */
     display: inline-block;
     vertical-align: baseline;
-    color: #1a454b;
+    color: #0D5A67;
 }
 
 /* Párrafo secundario — Cormorant Garamond */
@@ -342,7 +341,7 @@ body>* {
     font-size: clamp(1.6rem, 3.5vw, 2.6rem);
     line-height: 1.4;
     /* Mutación: 1.75 → 1.40 (-20%) */
-    color: #1a454b;
+    color: #0D5A67;
     margin: 0;
     text-align: center;
     -webkit-font-smoothing: antialiased;
@@ -366,7 +365,7 @@ body>* {
     /* QA: ajuste auditoría */
     letter-spacing: 0.2em;
     text-transform: uppercase;
-    color: rgba(74, 60, 52, 0.80);
+    color: #5B4123;
     /* Mutación: rgba sin herencia al nodo img — previo: #4a3c34 */
     text-align: center;
     transition: opacity 0.2s ease;
@@ -398,4 +397,40 @@ body>* {
     50% {
         transform: scale(1.15);
     }
+}
+
+/* ─── Transición Suave Intro → Main ──────────────────────────────────────── */
+#app-state-intro.is-fading {
+    opacity: 0;
+    transition: opacity 0.4s ease-in-out;
+}
+
+#app-state-main.is-fading-in {
+    opacity: 0;
+    transition: opacity 0.4s ease-in-out;
+}
+
+#app-state-main.is-fading-in.is-visible {
+    opacity: 1;
+}
+
+/* ─── Botón Volver al Inicio ─────────────────────────────────────────────── */
+.btn-inicio {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    width: 40px;
+    height: 40px;
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-inicio__icon {
+    width: 40px;
+    height: 40px;
 }
