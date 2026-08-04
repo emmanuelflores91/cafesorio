@@ -78,14 +78,19 @@
                 <figure class="gallery-grid">
 
                     <div class="gallery-grid__track" aria-live="polite">
-                        <img class="gallery-grid__slide" src="assets/images/chacra-8.jpg" alt="Vista exterior 1"
-                            draggable="false">
-                        <img class="gallery-grid__slide" src="assets/images/chacra-9.jpg" alt="Vista exterior 4"
-                            draggable="false">
-                        <img class="gallery-grid__slide" src="assets/images/chacra-10.jpg" alt="Vista exterior 2"
-                            draggable="false">
-                        <img class="gallery-grid__slide" src="assets/images/chacra-4.png" alt="Vista exterior 3"
-                            draggable="false">
+                        <img class="gallery-grid__slide" src="assets/images/chacra-8.jpg" alt="Vista exterior 1" draggable="false">
+                        <img class="gallery-grid__slide" src="assets/images/chacra-10.jpg" alt="Vista exterior 2" draggable="false">
+                        <img class="gallery-grid__slide" src="assets/images/chacra-4.png" alt="Vista exterior 3" draggable="false">
+                        <img class="gallery-grid__slide" src="assets/images/chacra-9.jpg" alt="Vista exterior 4" draggable="false">
+
+                        <div class="gallery-grid__zoom is-hidden">
+                            <img class="gallery-grid__zoom-img" src="" alt="" draggable="false">
+                            <button class="gallery-grid__zoom-close" type="button" aria-label="Cerrar imagen ampliada">
+                                <svg class="gallery-grid__zoom-close-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                    <polyline points="15 18 9 12 15 6" />
+                                </svg>
+                            </button>
+                        </div>
                     </div>
 
 
@@ -132,12 +137,12 @@
                 <hr class="venue-info__divider">
 
                 <div class="venue-info__form-section">
-                    <p>Formulario de asistencia y<br>consideraciones alimentarias</p>
                     <a href="https://docs.google.com/forms/d/e/1FAIpQLSfBRKIAf1oDwaejlKdOXCIsbNqcPuWyjJV8ddQSY6-H5wIhkg/viewform"
                         target="_blank" rel="noopener noreferrer" class="venue-form-btn"
                         aria-label="Abrir formulario de asistencia">
                         <div class="venue-icon-mask venue-form-btn__icon"
                             style="--icon-url: url('assets/images/formulario.png');"></div>
+                        <span>Formulario de asistencia y<br>consideraciones alimentarias</span>
                     </a>
                 </div>
 

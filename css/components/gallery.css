@@ -47,6 +47,7 @@
     position: relative;
     opacity: 1;
     box-shadow: 0 8px 35px 3px rgba(0, 0, 0, 0.59);
+    cursor: pointer;
 }
 
 /* ─── Controles Proyectados en Grilla ────────────────────────────────────── */
@@ -62,4 +63,51 @@
     margin: 16px;
     position: absolute;
     z-index: 100;
+}
+
+.gallery-grid__zoom {
+    position: absolute;
+    inset: 0;
+    z-index: 200;
+}
+
+.gallery-grid__zoom-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    box-shadow: 0 8px 35px 3px rgba(0, 0, 0, 0.59);
+}
+
+.gallery-grid__zoom-close {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(60, 60, 60, 0.75);
+    border-radius: 4px;
+    z-index: 210;
+    cursor: pointer;
+    transition: transform var(--transition-smooth);
+}
+
+.gallery-grid__zoom-close:hover,
+.gallery-grid__zoom-close:focus-visible {
+    transform: scale(1.1);
+    outline: none;
+}
+
+.gallery-grid__zoom-close-icon {
+    width: 22px;
+    height: 22px;
+    fill: none;
+    stroke: #FFFFFF;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    pointer-events: none;
 }

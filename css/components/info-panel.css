@@ -8,7 +8,7 @@
     flex-direction: column;
     align-items: flex-start;
     justify-content: center;
-    padding: var(--space-48) var(--space-32) var(--space-48) 50px;
+    padding: var(--space-48) var(--space-32) var(--space-48) var(--space-24);
     gap: var(--space-32);
     font-family: var(--font-primary);
     color: #5b4123;
@@ -31,6 +31,10 @@
 /* ─── Logo principal del venue ───────────────────────────────────────────── */
 .venue-info__logo-wrapper {
     margin-bottom: var(--space-16);
+    width: 100%;
+    max-width: 480px;
+    display: flex;
+    justify-content: center;
 }
 
 .venue-info__logo {
@@ -52,7 +56,7 @@
 /* ─── Dirección postal ───────────────────────────────────────────────────── */
 .venue-info__address {
     font-size: var(--text-base);
-    text-align: left;
+    text-align: center;
     line-height: 1.6;
     margin: 0;
 }
@@ -89,7 +93,7 @@
 
 /* ─── Separador decorativo ───────────────────────────────────────────────── */
 .venue-info__divider {
-    width: 60%;
+    width: 200px;
     border: none;
     border-bottom: 1px solid var(--color-divider);
     margin: 0;
@@ -99,29 +103,31 @@
 .venue-info__form-section {
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: flex-start;
     gap: var(--space-16);
-    text-align: center;
+    text-align: left;
     line-height: 1.4;
 }
 
-.venue-info__form-section p {
-    margin: 0;
+.venue-form-btn span {
     font-size: var(--text-lg);
     line-height: 1.4;
+    text-align: left;
 }
 
 .venue-form-btn {
     display: flex;
     align-items: center;
-    justify-content: center;
-    padding: var(--space-8);
+    justify-content: flex-start;
+    gap: var(--space-16);
+    padding: 0;
     transition: transform var(--transition-smooth);
 }
 
 .venue-form-btn__icon {
-    width: 44px;
-    height: 44px;
+    width: 26px;
+    height: 26px;
+    flex-shrink: 0;
 }
 
 .venue-form-btn:hover,
