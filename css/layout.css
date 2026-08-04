@@ -112,9 +112,9 @@ body>* {
     grid-column: 1;
     grid-row: 1;
     position: relative;
-    /* Mutación: Recálculo del Bounding Box.
-       Se restan 100px del eje Y para dejar exactamente 50px de margen superior e inferior. */
-    width: min(calc(100vw - 32px), calc((100vh - 90px) * (1920 / 1285)));
+    margin-top: 8px;
+    /* Mutación: Recálculo del Bounding Box para dejar espacio a los controles inferiores fijos */
+    width: min(calc(100vw - 32px), calc((100vh - 160px) * (1920 / 1285)));
     aspect-ratio: 1920 / 1285;
     cursor: pointer;
 }
@@ -151,15 +151,15 @@ body>* {
 
 /* ─── Controles laterales de navegación ──────────────────────────────────────────── */
 .comic-controls {
-    /* Mutación: Proyección de hijos directos sobre la grilla padre */
+    position: fixed;
+    bottom: 12px;
+    left: 0;
+    width: 100%;
+    z-index: 999;
     display: flex;
-    grid-column: 1;
-    grid-row: 2;
     justify-content: center;
     align-items: center;
     gap: 32px;
-    padding-bottom: 24px;
-    width: 100%;
 }
 
 .comic-btn {
@@ -411,19 +411,18 @@ body>* {
 .btn-inicio {
     position: relative;
     display: flex;
-    margin: 0;
-    width: 40px;
-    height: 40px;
-    z-index: 200;
-    display: flex;
     align-items: center;
     justify-content: center;
+    margin: 0;
+    width: 24px;
+    height: 24px;
+    z-index: 200;
     background: transparent;
     border: none;
     cursor: pointer;
 }
 
 .btn-inicio__icon {
-    width: 40px;
-    height: 40px;
+    width: 24px;
+    height: 24px;
 }

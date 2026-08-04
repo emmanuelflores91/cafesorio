@@ -22,33 +22,31 @@
     grid-column: 2;
     grid-row: 2;
     position: relative;
-    width: min(calc(60vw - 200px), calc((100vh - 120px) * (3 / 2)));
-    aspect-ratio: 3 / 2;
-    cursor: pointer;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+    width: 90%;
+    max-width: 1200px;
+    height: auto;
+}
+
+@media (min-width: 768px) {
+    .gallery-grid__track {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 32px;
+    }
 }
 
 /* ─── Cinemática de Extrusión y Desplazamiento ───────────────────────────── */
 .gallery-grid__slide {
-    position: absolute;
-    inset: 0;
     width: 100%;
     height: 100%;
+    aspect-ratio: 3/2;
     object-fit: cover;
+    display: block;
+    position: relative;
     opacity: 1;
-    transform: translateX(100vw);
-    transition: transform 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
-    z-index: 0;
     box-shadow: 0 8px 35px 3px rgba(0, 0, 0, 0.59);
-}
-
-.gallery-grid__slide.is-active {
-    transform: translateX(0);
-    z-index: 1;
-}
-
-.gallery-grid__slide.is-past {
-    transform: translateX(-100vw);
-    z-index: 0;
 }
 
 /* ─── Controles Proyectados en Grilla ────────────────────────────────────── */
@@ -56,44 +54,12 @@
     display: contents;
 }
 
-.gallery-btn--prev {
+#btn-back-to-last-comic {
     grid-column: 1;
-    grid-row: 2;
-    justify-self: end;
-}
-
-.gallery-btn--next {
-    grid-column: 3;
-    grid-row: 2;
+    grid-row: 1;
     justify-self: start;
-}
-
-/* ─── Dots proyectados en grilla ─────────────────────────────────────────── */
-.gallery-grid__dots {
-    grid-column: 2;
-    grid-row: 3;
     align-self: start;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--space-8);
-}
-
-/* ─── Dot individual ─────────────────────────────────────────────────────── */
-.gallery-grid__dots .comic-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background-color: var(--color-brown-mid);
-    border: none;
-    cursor: pointer;
-    opacity: 0.4;
-    transition: opacity var(--transition-smooth), transform var(--transition-smooth);
-    padding: 0;
-    flex-shrink: 0;
-}
-
-.gallery-grid__dots .comic-dot.is-active {
-    opacity: 1;
-    transform: scale(1.35);
+    margin: 16px;
+    position: absolute;
+    z-index: 100;
 }

@@ -64,26 +64,6 @@
             <img class="comic-slide" src="assets/images/vi-5-web-nv.webp" alt="Viñeta 5 de 5" draggable="false">
         </div>
 
-        <!-- Mutación: Inyección de panel de controles laterales absolutos -->
-        <nav class="comic-controls" aria-label="Controles de navegación de la historieta">
-            <button class="comic-btn comic-btn--prev" type="button" aria-label="Viñeta anterior">
-                <svg class="comic-btn-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                    <polyline points="15 18 9 12 15 6" />
-                </svg>
-            </button>
-            <button id="btn-go-home" class="btn-inicio is-hidden" type="button" aria-label="Volver al inicio">
-                <div class="venue-icon-mask btn-inicio__icon" style="--icon-url: url('assets/images/inicio.png');"></div>
-            </button>
-            <div class="comic-dots" role="tablist" aria-label="Indicadores de viñeta">
-                <!-- Nodos generados dinámicamente vía IntroController.js -->
-            </div>
-            <button class="comic-btn comic-btn--next" type="button" aria-label="Viñeta siguiente">
-                <svg class="comic-btn-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                    <polyline points="9 18 15 12 9 6" />
-                </svg>
-            </button>
-        </nav>
-
     </section>
 
 
@@ -98,32 +78,17 @@
                 <figure class="gallery-grid">
 
                     <div class="gallery-grid__track" aria-live="polite">
-                        <img class="gallery-grid__slide is-active" src="assets/images/chacra-8.jpg"
-                            alt="Vista exterior 1" draggable="false">
+                        <img class="gallery-grid__slide" src="assets/images/chacra-8.jpg" alt="Vista exterior 1"
+                            draggable="false">
+                        <img class="gallery-grid__slide" src="assets/images/chacra-9.jpg" alt="Vista exterior 4"
+                            draggable="false">
                         <img class="gallery-grid__slide" src="assets/images/chacra-10.jpg" alt="Vista exterior 2"
                             draggable="false">
                         <img class="gallery-grid__slide" src="assets/images/chacra-4.png" alt="Vista exterior 3"
                             draggable="false">
                     </div>
 
-                    <nav class="gallery-grid__controls" aria-label="Controles de la galería">
-                        <button class="comic-btn comic-btn--prev gallery-btn--prev" type="button"
-                            aria-label="Imagen anterior">
-                            <svg class="comic-btn-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                                <polyline points="15 18 9 12 15 6" />
-                            </svg>
-                        </button>
-                        <button class="comic-btn comic-btn--next gallery-btn--next" type="button"
-                            aria-label="Imagen siguiente">
-                            <svg class="comic-btn-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                                <polyline points="9 18 15 12 9 6" />
-                            </svg>
-                        </button>
-                    </nav>
 
-                    <div class="gallery-grid__dots comic-dots" role="tablist" aria-label="Indicadores de imagen">
-                        <!-- Nodos generados dinámicamente vía GalleryController.js -->
-                    </div>
 
                 </figure>
             </section>
@@ -181,6 +146,25 @@
         </main>
     </div><!-- /#app-state-main -->
 
+    <!-- Mutación: Inyección de panel de controles laterales absolutos -->
+    <nav class="comic-controls is-hidden" aria-label="Controles de navegación de la historieta">
+        <button class="comic-btn comic-btn--prev" type="button" aria-label="Viñeta anterior">
+            <svg class="comic-btn-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <polyline points="15 18 9 12 15 6" />
+            </svg>
+        </button>
+        <button id="btn-go-home" class="btn-inicio is-hidden" type="button" aria-label="Volver al inicio">
+            <div class="venue-icon-mask btn-inicio__icon" style="--icon-url: url('assets/images/inicio.png');"></div>
+        </button>
+        <div class="comic-dots" role="tablist" aria-label="Indicadores de viñeta">
+            <!-- Nodos generados dinámicamente vía IntroController.js -->
+        </div>
+        <button class="comic-btn comic-btn--next" type="button" aria-label="Viñeta siguiente">
+            <svg class="comic-btn-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <polyline points="9 18 15 12 9 6" />
+            </svg>
+        </button>
+    </nav>
 </body>
 
 </html>

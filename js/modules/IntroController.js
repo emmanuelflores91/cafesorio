@@ -19,6 +19,8 @@ class IntroController {
         this._nodeBtnNext  = document.querySelector('.comic-btn--next');
         this._nodeDotsWrap = document.querySelector('.comic-dots'); // Mutación: Puntero al contenedor de dots
         this._nodeBtnHome  = document.querySelector('#btn-go-home');
+        this._nodeBtnBackToLastComic = document.querySelector('#btn-back-to-last-comic');
+        this._nodeComicControls = document.querySelector('.comic-controls');
 
         if (!this._nodeCover || !this._nodeIntro || !this._nodeMain || !this._nodeTrack) {
             console.warn('IntroController: fallo en la resolución de nodos requeridos.');
@@ -26,7 +28,7 @@ class IntroController {
         }
 
         this._slides      = Array.from(this._nodeTrack.querySelectorAll('.comic-slide'));
-        this._totalSlides = this._slides.length;
+        this._totalSlides = this._slides.length + 1;
 
         this._currentIndex = 0;
         this._buildDots();   // Mutación: Inyección dinámica del modelo de dots
@@ -39,7 +41,8 @@ class IntroController {
         if (!this._nodeDotsWrap) return;
         this._nodeDotsWrap.innerHTML = ''; // Limpieza de estado residual
 
-        this._dots = this._slides.map((_, i) => {
+        this._dots = [];
+        for (let i = 0; i < this._totalSlides; i++) {
             const btn = document.createElement('button');
             btn.type = 'button';
             btn.className = 'comic-dot';
@@ -48,8 +51,8 @@ class IntroController {
             btn.setAttribute('aria-selected', 'false');
             btn.dataset.index = i;
             this._nodeDotsWrap.appendChild(btn);
-            return btn;
-        });
+            this._dots.push(btn);
+        }
     }
 
     // ── Mapeo de eventos ───────────────────────────────────────────────────
@@ -60,6 +63,10 @@ class IntroController {
 
         if (this._nodeBtnHome) {
             this._nodeBtnHome.addEventListener('click', this._goHome.bind(this));
+        }
+
+        if (this._nodeBtnBackToLastComic) {
+            this._nodeBtnBackToLastComic.addEventListener('click', this._goToLastComic.bind(this));
         }
 
         // Delegación de eventos bidireccionales — stopPropagation evita
@@ -99,6 +106,7 @@ class IntroController {
         this._nodeCover.classList.add('is-hidden');
         this._nodeIntro.classList.remove('is-hidden');
         if (this._nodeBtnHome) this._nodeBtnHome.classList.remove('is-hidden');
+        if (this._nodeComicControls) this._nodeComicControls.classList.remove('is-hidden');
     }
 
     // ── Transición direccional inversa ─────────────────────────────────────────
@@ -114,27 +122,31 @@ class IntroController {
 
     // ── Transición direccional directa ─────────────────────────────────────
     _goNext() {
-        if (this._currentIndex === this._totalSlides - 1) {
-            this._transitionToMain();
-            return;
-        }
+        if (this._currentIndex === this._totalSlides - 1) return;
         this._currentIndex += 1;
         this._renderState();
     }
 
     // ── Motor de resolución de clases de estado CSS ────────────────────────
     _renderState() {
-        // Renderizado del track de imágenes
-        this._slides.forEach((slide, index) => {
-            slide.classList.remove('is-active', 'is-past');
+        if (this._currentIndex < this._slides.length) {
+            this._nodeIntro.classList.remove('is-hidden');
+            this._nodeMain.classList.add('is-hidden');
+            // Renderizado del track de imágenes
+            this._slides.forEach((slide, index) => {
+                slide.classList.remove('is-active', 'is-past');
 
-            if (index === this._currentIndex) {
-                slide.classList.add('is-active');
-            } else if (index < this._currentIndex) {
-                slide.classList.add('is-past');
-            }
-            // index > this._currentIndex → sin clase → translateX(150vw) por defecto CSS
-        });
+                if (index === this._currentIndex) {
+                    slide.classList.add('is-active');
+                } else if (index < this._currentIndex) {
+                    slide.classList.add('is-past');
+                }
+                // index > this._currentIndex → sin clase → translateX(150vw) por defecto CSS
+            });
+        } else if (this._currentIndex === this._slides.length) {
+            this._nodeIntro.classList.add('is-hidden');
+            this._nodeMain.classList.remove('is-hidden');
+        }
 
         // Mutación: Sincronización de estado de indicadores (dots)
         if (this._dots) {
@@ -144,6 +156,14 @@ class IntroController {
                 dot.setAttribute('aria-selected', isActive ? 'true' : 'false');
             });
         }
+
+        if (this._nodeBtnBackToLastComic) {
+            this._nodeBtnBackToLastComic.classList.toggle('is-hidden', this._nodeMain.classList.contains('is-hidden'));
+        }
+
+        if (this._nodeBtnNext) {
+            this._nodeBtnNext.disabled = (this._currentIndex === this._totalSlides - 1);
+        }
     }
 
     // ── Mutación: Transición de estado global inversa (Intro → Cover) ──────────
@@ -151,6 +171,7 @@ class IntroController {
         this._nodeIntro.classList.add('is-hidden');
         this._nodeCover.classList.remove('is-hidden');
         if (this._nodeBtnHome) this._nodeBtnHome.classList.add('is-hidden');
+        if (this._nodeComicControls) this._nodeComicControls.classList.add('is-hidden');
     }
 
     _goHome() {
@@ -158,26 +179,17 @@ class IntroController {
         this._nodeIntro.classList.add('is-hidden');
         this._nodeCover.classList.remove('is-hidden');
         if (this._nodeBtnHome) this._nodeBtnHome.classList.add('is-hidden');
+        if (this._nodeComicControls) this._nodeComicControls.classList.add('is-hidden');
         this._currentIndex = 0;
         this._renderState();
     }
 
-    // ── Transición de estado global directa (Intro → Main) ──────────────────
-    _transitionToMain() {
-        this._nodeIntro.classList.add('is-fading');
-        setTimeout(() => {
-            this._nodeIntro.classList.add('is-hidden');
-            this._nodeIntro.classList.remove('is-fading');
-            this._nodeMain.classList.remove('is-hidden');
-            this._nodeMain.classList.add('is-fading-in');
-            requestAnimationFrame(() => {
-                this._nodeMain.classList.add('is-visible');
-            });
-            setTimeout(() => {
-                this._nodeMain.classList.remove('is-fading-in', 'is-visible');
-            }, 400);
-        }, 400);
+    _goToLastComic() {
+        this._currentIndex = this._slides.length - 1;
+        this._renderState();
     }
+
+
 }
 
 export default IntroController;
