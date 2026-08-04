@@ -56,11 +56,12 @@
     <section id="app-state-intro" class="comic-sequence is-hidden">
 
         <div class="comic-track">
-            <img class="comic-slide is-active" src="assets/images/vi-1-web.webp" alt="Viñeta 1 de 5" draggable="false">
-            <img class="comic-slide" src="assets/images/vi-2-web.webp" alt="Viñeta 2 de 5" draggable="false">
-            <img class="comic-slide" src="assets/images/vi-3-web.webp" alt="Viñeta 3 de 5" draggable="false">
-            <img class="comic-slide" src="assets/images/vi-4-web.webp" alt="Viñeta 4 de 5" draggable="false">
-            <img class="comic-slide" src="assets/images/vi-5-web.webp" alt="Viñeta 5 de 5" draggable="false">
+            <img class="comic-slide is-active" src="assets/images/vi-1-web-nv.webp" alt="Viñeta 1 de 5"
+                draggable="false">
+            <img class="comic-slide" src="assets/images/vi-2-web-nv.webp" alt="Viñeta 2 de 5" draggable="false">
+            <img class="comic-slide" src="assets/images/vi-3-web-nv.webp" alt="Viñeta 3 de 5" draggable="false">
+            <img class="comic-slide" src="assets/images/vi-4-web-nv.webp" alt="Viñeta 4 de 5" draggable="false">
+            <img class="comic-slide" src="assets/images/vi-5-web-nv.webp" alt="Viñeta 5 de 5" draggable="false">
         </div>
 
         <!-- Mutación: Inyección de panel de controles laterales absolutos -->
@@ -70,17 +71,18 @@
                     <polyline points="15 18 9 12 15 6" />
                 </svg>
             </button>
+            <button id="btn-go-home" class="btn-inicio is-hidden" type="button" aria-label="Volver al inicio">
+                <div class="venue-icon-mask btn-inicio__icon" style="--icon-url: url('assets/images/inicio.png');"></div>
+            </button>
+            <div class="comic-dots" role="tablist" aria-label="Indicadores de viñeta">
+                <!-- Nodos generados dinámicamente vía IntroController.js -->
+            </div>
             <button class="comic-btn comic-btn--next" type="button" aria-label="Viñeta siguiente">
                 <svg class="comic-btn-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
                     <polyline points="9 18 15 12 9 6" />
                 </svg>
             </button>
         </nav>
-
-        <!-- Mutación: Inyección del contenedor de identificadores de posición -->
-        <div class="comic-dots" role="tablist" aria-label="Indicadores de viñeta">
-            <!-- Nodos generados dinámicamente vía IntroController.js -->
-        </div>
 
     </section>
 
@@ -179,9 +181,6 @@
         </main>
     </div><!-- /#app-state-main -->
 
-    <button id="btn-go-home" class="btn-inicio is-hidden" type="button" aria-label="Volver al inicio">
-        <div class="venue-icon-mask btn-inicio__icon" style="--icon-url: url('assets/images/inicio.png');"></div>
-    </button>
 </body>
 
 </html>

@@ -96,10 +96,8 @@ body>* {
     height: 100vh;
     display: grid;
     /* Mutación: Grid 3×3 — columna/fila central envuelve el track */
-    grid-template-columns: 1fr auto 1fr;
-    grid-template-rows: 1fr auto 1fr;
-    column-gap: 30px;
-    /* Mutación: Reducción de interpolación espacial a 30px exactos */
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr auto;
     /* Mutación: Reducción exclusiva del gap vertical a 18px para acercar los indicadores */
     row-gap: 18px;
     align-items: center;
@@ -111,12 +109,12 @@ body>* {
 
 /* ─── Track: contexto de apilamiento para las viñetas ─────────────────────────── */
 .comic-track {
-    grid-column: 2;
-    grid-row: 2;
+    grid-column: 1;
+    grid-row: 1;
     position: relative;
     /* Mutación: Recálculo del Bounding Box.
        Se restan 100px del eje Y para dejar exactamente 50px de margen superior e inferior. */
-    width: min(calc(100vw - 188px), calc((100vh - 100px) * (1920 / 1285)));
+    width: min(calc(100vw - 32px), calc((100vh - 90px) * (1920 / 1285)));
     aspect-ratio: 1920 / 1285;
     cursor: pointer;
 }
@@ -154,7 +152,14 @@ body>* {
 /* ─── Controles laterales de navegación ──────────────────────────────────────────── */
 .comic-controls {
     /* Mutación: Proyección de hijos directos sobre la grilla padre */
-    display: contents;
+    display: flex;
+    grid-column: 1;
+    grid-row: 2;
+    justify-content: center;
+    align-items: center;
+    gap: 32px;
+    padding-bottom: 24px;
+    width: 100%;
 }
 
 .comic-btn {
@@ -177,15 +182,9 @@ body>* {
 }
 
 .comic-btn--prev {
-    grid-column: 1;
-    grid-row: 2;
-    justify-self: end;
 }
 
 .comic-btn--next {
-    grid-column: 3;
-    grid-row: 2;
-    justify-self: start;
 }
 
 .comic-btn:hover,
@@ -218,14 +217,8 @@ body>* {
 
 /* ─── Indicadores de posición (Dots) ─────────────────────────────────────────── */
 .comic-dots {
-    grid-column: 2;
-    grid-row: 3;
-    align-self: start;
-    margin-top: 2px;
     /* Centrado perfecto en la franja de 50px (18px de gap + 2px = 20px arriba del dot de 10px) */
     /* Mutación: Depuración de anclajes absolutos; eje posicional delegado al Grid */
-    position: static;
-    transform: none;
     display: flex;
     align-items: center;
     gap: 12px;
@@ -416,9 +409,9 @@ body>* {
 
 /* ─── Botón Volver al Inicio ─────────────────────────────────────────────── */
 .btn-inicio {
-    position: fixed;
-    top: 10px;
-    left: 10px;
+    position: relative;
+    display: flex;
+    margin: 0;
     width: 40px;
     height: 40px;
     z-index: 200;
