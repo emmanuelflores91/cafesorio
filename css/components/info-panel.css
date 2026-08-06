@@ -53,6 +53,26 @@
     max-width: 480px;
 }
 
+/* ─── Bloque de acciones (links + formulario) — Mobile: 2 columnas ───────── */
+.venue-info__actions {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-16);
+    width: 100%;
+    max-width: 480px;
+}
+
+@media (min-width: 1024px) {
+    .venue-info__actions {
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: flex-start;
+        gap: var(--space-32);
+    }
+}
+
 /* ─── Dirección postal ───────────────────────────────────────────────────── */
 .venue-info__address {
     font-size: var(--text-base);
@@ -93,10 +113,22 @@
 
 /* ─── Separador decorativo ───────────────────────────────────────────────── */
 .venue-info__divider {
-    width: 200px;
+    width: 1px;
+    height: auto;
+    align-self: stretch;
     border: none;
-    border-bottom: 1px solid var(--color-divider);
+    border-right: 1px solid var(--color-divider);
     margin: 0;
+}
+
+@media (min-width: 1024px) {
+    .venue-info__divider {
+        width: 200px;
+        height: auto;
+        align-self: auto;
+        border-right: none;
+        border-bottom: 1px solid var(--color-divider);
+    }
 }
 
 /* ─── Call to Action (Formulario) ────────────────────────────────────────── */

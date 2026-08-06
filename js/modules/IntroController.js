@@ -132,6 +132,7 @@ class IntroController {
         if (this._currentIndex < this._slides.length) {
             this._nodeIntro.classList.remove('is-hidden');
             this._nodeMain.classList.add('is-hidden');
+            if (this._nodeComicControls) this._nodeComicControls.classList.remove('comic-controls--main-state');
             // Renderizado del track de imágenes
             this._slides.forEach((slide, index) => {
                 slide.classList.remove('is-active', 'is-past');
@@ -146,6 +147,7 @@ class IntroController {
         } else if (this._currentIndex === this._slides.length) {
             this._nodeIntro.classList.add('is-hidden');
             this._nodeMain.classList.remove('is-hidden');
+            if (this._nodeComicControls) this._nodeComicControls.classList.add('comic-controls--main-state');
         }
 
         // Mutación: Sincronización de estado de indicadores (dots)

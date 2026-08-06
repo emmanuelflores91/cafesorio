@@ -162,6 +162,16 @@ body>* {
     gap: 32px;
 }
 
+/* ─── Mobile: nav de galería pegado debajo de la grilla (Viewport < 1024px) ──────── */
+@media (max-width: 1023px) {
+    .comic-controls.comic-controls--main-state {
+        position: absolute;
+        top: calc(33.333vh + 8px);
+        bottom: auto;
+        z-index: 10;
+    }
+}
+
 .comic-btn {
     appearance: none;
     -webkit-appearance: none;
