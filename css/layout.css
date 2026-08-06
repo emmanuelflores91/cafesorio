@@ -78,6 +78,13 @@ body::before {
     /* mix-blend-mode: multiply; */
 }
 
+@media (max-width: 1023px) {
+    body::before {
+        inset: -50%;
+        transform: scale(0.5);
+    }
+}
+
 body>* {
     position: relative;
     z-index: 1;
@@ -166,9 +173,11 @@ body>* {
 @media (max-width: 1023px) {
     .comic-controls.comic-controls--main-state {
         position: absolute;
-        top: calc(33.333vh + 8px);
+        top: calc(33.333vh + 18px);
         bottom: auto;
         z-index: 10;
+        transform: scale(0.82);
+        transform-origin: center top;
     }
 }
 

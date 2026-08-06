@@ -14,6 +14,12 @@
     color: #5b4123;
 }
 
+@media (max-width: 1023px) {
+    .venue-info {
+        gap: 0;
+    }
+}
+
 /* ─── Máquina de Estados para Máscaras CSS ───────────────────────────────── */
 .venue-icon-mask {
     display: inline-block;
@@ -44,6 +50,16 @@
     object-fit: contain;
 }
 
+@media (max-width: 1023px) {
+    .venue-info__logo-wrapper {
+        margin-top: 55px;
+    }
+
+    .venue-info__logo {
+        width: 156px;
+    }
+}
+
 /* ─── Contenedor de cuerpo (Alineación estructurada) ─────────────────────── */
 .venue-info__body {
     display: flex;
@@ -64,6 +80,12 @@
     max-width: 480px;
 }
 
+@media (max-width: 1023px) {
+    .venue-info__actions {
+        margin-top: 30px;
+    }
+}
+
 @media (min-width: 1024px) {
     .venue-info__actions {
         flex-direction: column;
@@ -79,6 +101,13 @@
     text-align: center;
     line-height: 1.6;
     margin: 0;
+}
+
+@media (max-width: 1023px) {
+    .venue-info__address {
+        font-size: calc(var(--text-base) * 1.13);
+        line-height: 1.35;
+    }
 }
 
 /* ─── Navegación y Enlaces ───────────────────────────────────────────────── */
@@ -114,8 +143,8 @@
 /* ─── Separador decorativo ───────────────────────────────────────────────── */
 .venue-info__divider {
     width: 1px;
-    height: auto;
-    align-self: stretch;
+    height: 126px;
+    align-self: flex-start;
     border: none;
     border-right: 1px solid var(--color-divider);
     margin: 0;
@@ -141,6 +170,13 @@
     line-height: 1.4;
 }
 
+@media (max-width: 1023px) {
+    .venue-info__form-section {
+        align-items: center;
+        text-align: center;
+    }
+}
+
 .venue-form-btn span {
     font-size: var(--text-lg);
     line-height: 1.4;
@@ -160,6 +196,27 @@
     width: 26px;
     height: 26px;
     flex-shrink: 0;
+}
+
+@media (max-width: 1023px) {
+    .venue-form-btn {
+        flex-direction: column-reverse;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .venue-form-btn span {
+        text-align: center;
+        max-width: 110px;
+        margin: 0 auto;
+        font-size: calc(var(--text-lg) * 0.92);
+        line-height: 1.25;
+    }
+
+    .venue-form-btn__icon {
+        width: 36px;
+        height: 36px;
+    }
 }
 
 .venue-form-btn:hover,
