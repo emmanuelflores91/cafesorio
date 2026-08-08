@@ -37,11 +37,17 @@ class GalleryController {
         this._nodeZoomImg.src = slide.src;
         this._nodeZoomImg.alt = slide.alt;
         this._nodeZoom.classList.remove('is-hidden');
+        requestAnimationFrame(() => {
+            this._nodeZoom.classList.add('is-visible');
+        });
     }
 
     // ── Cerrar imagen ampliada ─────────────────────────────────────────────
     _closeZoom() {
-        this._nodeZoom.classList.add('is-hidden');
+        this._nodeZoom.classList.remove('is-visible');
+        this._nodeZoom.addEventListener('transitionend', () => {
+            this._nodeZoom.classList.add('is-hidden');
+        }, { once: true });
     }
 }
 

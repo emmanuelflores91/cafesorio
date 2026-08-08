@@ -1,22 +1,17 @@
 # variables.txt — generado por Gemini
 
 [TERMINOS]
-.layout-split__gallery
-.gallery-grid__track
-.gallery-grid__slide
-.venue-info
-.venue-info__logo-wrapper
-.venue-info__logo
-.venue-info__body
-.venue-info__address
-.venue-info__actions
-.venue-info__links
-.venue-info__form-section
-.venue-form-btn
-.comic-controls
-.comic-btn--prev
-.comic-btn--next
-.comic-dots
+_renderState @ js/modules/IntroController.js
+_mapEvents @ js/modules/IntroController.js
+_openComicZoom @ js/modules/IntroController.js
+_closeComicZoom @ js/modules/IntroController.js
+_openZoom @ js/modules/GalleryController.js
+_closeZoom @ js/modules/GalleryController.js
+.comic-slide @ css/layout.css
+.gallery-grid__zoom @ css/components/gallery.css
+.gallery-grid__zoom-img @ css/components/gallery.css
+#app-state-intro @ index.html
+#app-state-main @ index.html
 
 [ARCHIVOS_COMPLETOS]
 

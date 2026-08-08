@@ -134,6 +134,8 @@ class IntroController {
         const DOUBLE_TAP_THRESHOLD = 300;
 
         this._nodeTrack.addEventListener('touchend', (e) => {
+            if (this._nodeComicZoom && !this._nodeComicZoom.classList.contains('is-hidden')) return;
+
             const touchEndX = e.changedTouches[0].screenX;
             const touchEndY = e.changedTouches[0].screenY;
             const deltaX = touchEndX - this._touchStartX;
@@ -248,8 +250,18 @@ class IntroController {
             });
         } else if (this._currentIndex === this._slides.length) {
             if (introStarted) {
-                this._nodeIntro.classList.add('is-hidden');
+                this._nodeIntro.classList.add('is-fading-out');
+                this._nodeIntro.addEventListener('transitionend', () => {
+                    this._nodeIntro.classList.add('is-hidden');
+                    this._nodeIntro.classList.remove('is-fading-out');
+                }, { once: true });
+
                 this._nodeMain.classList.remove('is-hidden');
+                this._nodeMain.style.opacity = '0';
+                requestAnimationFrame(() => {
+                    this._nodeMain.style.opacity = '1';
+                });
+
                 if (this._nodeComicControls) this._nodeComicControls.classList.add('comic-controls--main-state');
             }
         }
@@ -279,11 +291,17 @@ class IntroController {
         this._nodeComicZoomImg.alt = slide.alt;
         this._nodeComicZoomImg.style.objectFit = 'contain';
         this._nodeComicZoom.classList.remove('is-hidden');
+        requestAnimationFrame(() => {
+            this._nodeComicZoom.classList.add('is-visible');
+        });
     }
 
     _closeComicZoom() {
         if (!this._nodeComicZoom) return;
-        this._nodeComicZoom.classList.add('is-hidden');
+        this._nodeComicZoom.classList.remove('is-visible');
+        this._nodeComicZoom.addEventListener('transitionend', () => {
+            this._nodeComicZoom.classList.add('is-hidden');
+        }, { once: true });
     }
 
     // ── Mutación: Transición de estado global inversa (Intro → Cover) ──────────

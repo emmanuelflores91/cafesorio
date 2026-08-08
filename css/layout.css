@@ -95,6 +95,15 @@ body>* {
     display: none !important;
 }
 
+#app-state-intro,
+#app-state-main {
+    transition: opacity 0.4s ease;
+}
+
+.is-fading-out {
+    opacity: 0;
+}
+
 /* ─── Estado inicial: secuencia de viñetas cómicas ───────────────────────────────────────
  * Ocupa el viewport completo y centra el track de slides.
  * ────────────────────────────────────────────────────────────────────────────── */
@@ -141,7 +150,7 @@ body>* {
     z-index: 0;
     border: none;
     /* Mutación: +30% canal alfa (0.45→0.59), +10% expansión (35px blur, 3px spread) */
-    box-shadow: 0 8px 35px 3px rgba(0, 0, 0, 0.59);
+    box-shadow: 0 8px 35px 3px rgba(0, 0, 0, 0.74);
 }
 
 /* ─── Estado activo del slide (Viewport central) ──────────────────────────────── */
@@ -437,6 +446,14 @@ body>* {
 }
 
 @media (orientation: landscape) and (width: 874px) and (height: 402px) {
+    .cover-sequence__inner {
+        transform: scale(0.65);
+    }
+
+    .cover-sequence__cta {
+        margin-top: 1rem;
+    }
+
     .layout-split {
         flex-direction: column;
     }

@@ -18,7 +18,7 @@ const outputPath = "extracto.txt";
 
 const CODE_EXTS = new Set([".html", ".htm", ".css", ".js", ".mjs"]);
 const SKIP_DIRS = new Set(["node_modules", ".git", "dist", "build", ".next", ".vscode", ".idea"]);
-const SKIP_FILES = new Set(["extraer.js", "extracto.txt", "variables.txt", "salida_proyecto.txt"]);
+const SKIP_FILES = new Set(["extraer.js", "extracto.txt", "extracto_delta.txt", "variables.txt", "salida_proyecto.txt"]);
 const VOID_TAGS = new Set(["area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "param", "source", "track", "wbr"]);
 
 const escapeRegExp = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -167,9 +167,11 @@ function extractHtml(src, terms) {
         let p = node.parent;
         while (p && p.tag !== "#root") { chain.unshift(p); p = p.parent; }
         const chainStr = chain.map((a) => `  <!-- ANCESTRO: ${a.attrs} -->`).join("\n");
-        return `--- <${node.tag}> coincide con ${term.raw} (líneas ${lineOf(src, node.start)}-${lineOf(src, node.end)}) ---\n${chainStr ? chainStr + "\n" : ""}${text}`;
+        const header = `--- <${node.tag}> coincide con ${term.raw} (líneas ${lineOf(src, node.start)}-${lineOf(src, node.end)}) ---`;
+        const body = `${chainStr ? chainStr + "\n" : ""}${text}`;
+        return { header, body, out: `${header}\n${body}` };
     });
-    return { text: parts.join("\n\n"), counts, identifiers };
+    return { parts, counts, identifiers };
 }
 
 /* ============ 4. CSS ============ */
@@ -219,11 +221,22 @@ function cssSelectorMatches(selector, terms) {
     return null;
 }
 
+// v1.4: los términos también matchean el contenido de at-rules (@media, @supports)
+// ej: "orientation @ css/layout.css" extrae solo las reglas dentro de esas media queries
+function cssAtMatches(atChain, terms) {
+    if (!atChain.length) return null;
+    const at = atChain.join(" ");
+    for (const t of terms) {
+        if (at.includes(t.value)) return t;
+    }
+    return null;
+}
+
 function extractCss(src, terms) {
     const rules = parseCssRules(src);
     const matched = [];
     for (const r of rules) {
-        const t = cssSelectorMatches(r.selector, terms);
+        const t = cssSelectorMatches(r.selector, terms) || cssAtMatches(r.atChain, terms);
         if (t) matched.push({ rule: r, term: t });
     }
     if (!matched.length) return null;
@@ -248,11 +261,14 @@ function extractCss(src, terms) {
         const wrapOpen = rule.atChain.map((a) => a + " {").join("\n");
         const wrapClose = rule.atChain.map(() => "}").join("\n");
         const body = src.slice(rule.start, rule.end).trim();
-        return (wrapOpen ? wrapOpen + "\n" : "") + body + (wrapClose ? "\n" + wrapClose : "");
+        const out = (wrapOpen ? wrapOpen + "\n" : "") + body + (wrapClose ? "\n" + wrapClose : "");
+        return { header: "", body, out };
     });
-    if (varDecls.size)
-        parts.unshift("/* Variables CSS referenciadas */\n:root {\n  " + [...varDecls].join("\n  ") + "\n}");
-    return { text: parts.join("\n\n"), counts };
+    if (varDecls.size) {
+        const vbody = [...varDecls].join("\n  ");
+        parts.unshift({ header: "/* Variables CSS referenciadas */", body: vbody, out: "/* Variables CSS referenciadas */\n:root {\n  " + vbody + "\n}" });
+    }
+    return { parts, counts };
 }
 
 /* ============ 5. JS ============ */
@@ -316,10 +332,16 @@ function extractJs(src, terms) {
     }
     const importLines = lines.filter((l) => /^\s*import\s/.test(l));
     const parts = [];
-    if (importLines.length) parts.push("// --- imports del archivo ---\n" + importLines.join("\n"));
-    for (const r of merged)
-        parts.push(`// --- líneas ${lineOf(src, r.start)}-${lineOf(src, r.end)} ---\n` + src.slice(r.start, r.end));
-    return { text: parts.join("\n\n// …\n\n"), counts };
+    if (importLines.length) {
+        const ibody = importLines.join("\n");
+        parts.push({ header: "// --- imports del archivo ---", body: ibody, out: "// --- imports del archivo ---\n" + ibody });
+    }
+    for (const r of merged) {
+        const b = src.slice(r.start, r.end);
+        const header = `// --- líneas ${lineOf(src, r.start)}-${lineOf(src, r.end)} ---`;
+        parts.push({ header, body: b, out: header + "\n" + b });
+    }
+    return { parts, counts };
 }
 
 /* ============ 6. MAIN ============ */
@@ -352,6 +374,21 @@ function main() {
     // Filtra términos por scope (los que no tienen @ aplican a todos los archivos)
     const forFile = (list, f) => list.filter((t) => !t.scope || t.scope === f);
 
+    /* ---- MODO DELTA (v1.3) ---- */
+    const deltaPath = "extracto_delta.txt";
+    const forceFull = process.argv.includes("--full");
+    const oldExtract = !forceFull && fs.existsSync(outputPath) ? fs.readFileSync(outputPath, "utf8") : null;
+    const alreadySent = (body) => !!oldExtract && oldExtract.includes(body);
+    const skipped = [];
+    const splitParts = (f, parts, section) => {
+        const full = `### ${f}\n` + parts.map((p) => p.out).join("\n\n");
+        const newParts = parts.filter((p) => !alreadySent(p.body));
+        const skippedCount = parts.length - newParts.length;
+        if (skippedCount > 0) skipped.push(`- ${f} (${section}: ${skippedCount} bloque/s sin cambios)`);
+        const delta = newParts.length ? `### ${f}\n` + newParts.map((p) => p.out).join("\n\n") : null;
+        return { full, delta };
+    };
+
     const out = [];
     out.push("=== EXTRACTO DE PROYECTO ===");
     out.push(`Generado: ${new Date().toISOString()}`);
@@ -364,12 +401,18 @@ function main() {
     }
 
     const fullUsed = [];
+    const fullBlocksDelta = [];
     if (vars.archivosCompletos.length) {
         out.push("\n=== ARCHIVOS COMPLETOS ===");
         for (const rel of vars.archivosCompletos) {
             if (fs.existsSync(path.join(rootDir, rel))) {
                 const fullContent = read(rel);
-                out.push(`--- ${rel} (completo) ---\n${fullContent}`);
+                const wasSentBefore = !!oldExtract && oldExtract.includes(`--- ${rel} (completo`);
+                const changed = !alreadySent(fullContent);
+                const header = `--- ${rel} (completo${wasSentBefore && changed ? ", MODIFICADO — reemplaza la versión anterior" : ""}) ---`;
+                out.push(`${header}\n${fullContent}`);
+                if (changed) fullBlocksDelta.push(`${header}\n${fullContent}`);
+                else skipped.push(`- ${rel} (archivo completo sin cambios)`);
                 fullUsed.push(rel);
                 // Contar términos dentro del archivo completo para el REPORTE
                 for (const t of terms) {
@@ -387,10 +430,13 @@ function main() {
     const auto = { ids: new Set(), classes: new Set() };
     const extractedFiles = new Set(fullUsed);
     const htmlOut = [];
+    const htmlDelta = [];
     for (const f of codeFiles.filter((f) => /\.html?$/i.test(f) && !fullUsed.includes(f))) { // los fullUsed ya se incluyeron enteros
         const r = extractHtml(read(f), forFile(terms, f));
         if (!r) continue;
-        htmlOut.push(`### ${f}\n${r.text}`);
+        const split = splitParts(f, r.parts, "html");
+        htmlOut.push(split.full);
+        if (split.delta) htmlDelta.push(split.delta);
         extractedFiles.add(f);
         r.identifiers.ids.forEach((i) => auto.ids.add(i));
         r.identifiers.classes.forEach((c) => auto.classes.add(c));
@@ -404,19 +450,25 @@ function main() {
     const searchTerms = [...terms, ...autoTerms];
 
     const cssOut = [];
+    const cssDelta = [];
     for (const f of codeFiles.filter((f) => f.endsWith(".css") && !fullUsed.includes(f))) {
         const r = extractCss(read(f), forFile(searchTerms, f));
         if (!r) continue;
-        cssOut.push(`### ${f}\n${r.text}`);
+        const split = splitParts(f, r.parts, "css");
+        cssOut.push(split.full);
+        if (split.delta) cssDelta.push(split.delta);
         extractedFiles.add(f);
         for (const [raw, c] of Object.entries(r.counts)) if (isUserTerm(raw)) touch(raw, f, "css", c);
     }
 
     const jsOut = [];
+    const jsDelta = [];
     for (const f of codeFiles.filter((f) => /\.m?js$/.test(f) && !fullUsed.includes(f))) {
         const r = extractJs(read(f), forFile(searchTerms, f));
         if (!r) continue;
-        jsOut.push(`### ${f}\n${r.text}`);
+        const split = splitParts(f, r.parts, "js");
+        jsOut.push(split.full);
+        if (split.delta) jsDelta.push(split.delta);
         extractedFiles.add(f);
         for (const [raw, c] of Object.entries(r.counts)) if (isUserTerm(raw)) touch(raw, f, "js", c);
     }
@@ -445,7 +497,34 @@ function main() {
     }
 
     fs.writeFileSync(outputPath, out.join("\n"), "utf8");
-    console.log(`✔ Listo: ${outputPath}`);
+
+    /* ---- ESCRIBIR DELTA ---- */
+    const deltaOut = [];
+    deltaOut.push("=== EXTRACTO DELTA (solo lo nuevo o modificado) ===");
+    deltaOut.push(`Generado: ${new Date().toISOString()}`);
+    deltaOut.push("Este extracto contiene SOLO lo nuevo o modificado respecto del último extracto ya enviado a Claude en este chat. Todo lo que NO está acá sigue vigente tal como lo tiene Claude.");
+    deltaOut.push(`Términos: ${vars.terminos.join(", ") || "(ninguno)"}`);
+    if (vars.estructura) {
+        const tree = allFiles.join("\n");
+        if (!alreadySent(tree)) deltaOut.push("\n=== ESTRUCTURA DE ARCHIVOS ===\n" + tree);
+    }
+    if (fullBlocksDelta.length) deltaOut.push("\n=== ARCHIVOS COMPLETOS ===\n" + fullBlocksDelta.join("\n\n"));
+    if (htmlDelta.length) deltaOut.push("\n=== HTML (extractos) ===\n" + htmlDelta.join("\n\n"));
+    if (cssDelta.length) deltaOut.push("\n=== CSS (reglas relevantes) ===\n" + cssDelta.join("\n\n"));
+    if (jsDelta.length) deltaOut.push("\n=== JS (bloques relevantes) ===\n" + jsDelta.join("\n\n"));
+    if (related.length) deltaOut.push("\n=== POSIBLEMENTE RELACIONADO (no incluido) ===\n" + related.join("\n"));
+    deltaOut.push("\n=== REPORTE ===");
+    for (const t of terms) {
+        const hits = report.get(t.raw);
+        deltaOut.push(hits && hits.length ? `✔ ${t.raw} → ${hits.join(", ")}` : `✘ ${t.raw} → NO encontrado en ningún archivo`);
+    }
+    if (skipped.length) deltaOut.push("\n=== YA ENVIADO ANTES (sin cambios, no se repite) ===\n" + skipped.join("\n"));
+    const nothingNew = !fullBlocksDelta.length && !htmlDelta.length && !cssDelta.length && !jsDelta.length;
+    if (nothingNew) deltaOut.push("\n(no hay contenido nuevo: todo lo pedido ya fue enviado antes y no cambió)");
+    fs.writeFileSync(deltaPath, deltaOut.join("\n"), "utf8");
+
+    console.log(`✔ Listo: ${outputPath} (completo)`);
+    console.log(oldExtract ? `✔ ${deltaPath} (solo lo nuevo/modificado${nothingNew ? ": nada" : ""})` : `✔ ${deltaPath} (no había extracto previo: contiene todo)`);
     const missing = terms.filter((t) => !report.has(t.raw));
     if (missing.length) console.log(`⚠ Términos sin coincidencias: ${missing.map((t) => t.raw).join(", ")}`);
 }
