@@ -99,6 +99,50 @@ class IntroController {
                 }
             });
         }
+
+        // Navegación por teclado: flecha derecha avanza, flecha izquierda retrocede.
+        // Actúa si la vista intro o la vista main están activas; se bloquea
+        // únicamente cuando ambas están ocultas (es decir, estamos en cover).
+        document.addEventListener('keydown', (e) => {
+            const introHidden = this._nodeIntro.classList.contains('is-hidden');
+            const mainHidden = this._nodeMain.classList.contains('is-hidden');
+            if (introHidden && mainHidden) return;
+            if (e.key === 'ArrowRight') {
+                this._goNext();
+            } else if (e.key === 'ArrowLeft') {
+                this._goPrev();
+            }
+        });
+
+        // Navegación táctil (swipe) sobre el track de imágenes.
+        // Swipe derecha→izquierda avanza, swipe izquierda→derecha retrocede.
+        // Umbral mínimo de 50px para distinguir un swipe real de un tap;
+        // si no se supera el umbral, no se interviene y el click de fallback
+        // existente sobre _nodeTrack sigue manejando el tap normalmente.
+        this._touchStartX = 0;
+        this._touchStartY = 0;
+        const SWIPE_THRESHOLD = 50;
+
+        this._nodeTrack.addEventListener('touchstart', (e) => {
+            this._touchStartX = e.changedTouches[0].screenX;
+            this._touchStartY = e.changedTouches[0].screenY;
+        });
+
+        this._nodeTrack.addEventListener('touchend', (e) => {
+            const touchEndX = e.changedTouches[0].screenX;
+            const touchEndY = e.changedTouches[0].screenY;
+            const deltaX = touchEndX - this._touchStartX;
+            const deltaY = touchEndY - this._touchStartY;
+
+            if (Math.abs(deltaX) > SWIPE_THRESHOLD && Math.abs(deltaX) > Math.abs(deltaY)) {
+                e.stopPropagation();
+                if (deltaX < 0) {
+                    this._goNext();
+                } else {
+                    this._goPrev();
+                }
+            }
+        });
     }
 
     // ── Handler: clic en #btn-start-comic ─────────────────────────────────
@@ -129,10 +173,18 @@ class IntroController {
 
     // ── Motor de resolución de clases de estado CSS ────────────────────────
     _renderState() {
+        // Bugfix: solo se puede tocar la visibilidad de intro/main si el
+        // usuario ya arrancó el recorrido (cover oculto). Evita que la
+        // llamada inicial desde el constructor destape #app-state-intro
+        // antes de tocar el botón de inicio.
+        const introStarted = this._nodeCover.classList.contains('is-hidden');
+
         if (this._currentIndex < this._slides.length) {
-            this._nodeIntro.classList.remove('is-hidden');
-            this._nodeMain.classList.add('is-hidden');
-            if (this._nodeComicControls) this._nodeComicControls.classList.remove('comic-controls--main-state');
+            if (introStarted) {
+                this._nodeIntro.classList.remove('is-hidden');
+                this._nodeMain.classList.add('is-hidden');
+                if (this._nodeComicControls) this._nodeComicControls.classList.remove('comic-controls--main-state');
+            }
             // Renderizado del track de imágenes
             this._slides.forEach((slide, index) => {
                 slide.classList.remove('is-active', 'is-past');
@@ -145,9 +197,11 @@ class IntroController {
                 // index > this._currentIndex → sin clase → translateX(150vw) por defecto CSS
             });
         } else if (this._currentIndex === this._slides.length) {
-            this._nodeIntro.classList.add('is-hidden');
-            this._nodeMain.classList.remove('is-hidden');
-            if (this._nodeComicControls) this._nodeComicControls.classList.add('comic-controls--main-state');
+            if (introStarted) {
+                this._nodeIntro.classList.add('is-hidden');
+                this._nodeMain.classList.remove('is-hidden');
+                if (this._nodeComicControls) this._nodeComicControls.classList.add('comic-controls--main-state');
+            }
         }
 
         // Mutación: Sincronización de estado de indicadores (dots)

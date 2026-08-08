@@ -1,0 +1,21 @@
+# variables.txt — generado por Gemini
+
+[TERMINOS]
+_renderState @ js/modules/IntroController.js # Quita la clase de ocultamiento incondicionalmente
+constructor @ js/modules/IntroController.js # Llama a _renderState al iniciar, provocando que se vea la intro
+_onStartClick @ js/modules/IntroController.js # Método que legítimamente debería mostrar la intro
+#app-state-cover @ index.html # Contenedor de la portada
+#app-state-intro @ index.html # Contenedor de la intro que aparece por error abajo
+body @ css/reset.css
+body @ css/layout.css
+html @ css/reset.css
+
+[ARCHIVOS_COMPLETOS]
+js/modules/IntroController.js
+css/reset.css
+css/variables.css
+css/typography.css
+index.html
+
+[ESTRUCTURA]
+true

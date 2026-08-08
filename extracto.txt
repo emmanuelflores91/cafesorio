@@ -1,0 +1,637 @@
+=== EXTRACTO DE PROYECTO ===
+Generado: 2026-08-08T01:59:41.245Z
+Términos: _renderState @ js/modules/IntroController.js, constructor @ js/modules/IntroController.js, _onStartClick @ js/modules/IntroController.js, #app-state-cover @ index.html, #app-state-intro @ index.html, body @ css/reset.css, body @ css/layout.css, html @ css/reset.css
+Archivos completos: js/modules/IntroController.js, css/reset.css, css/variables.css, css/typography.css, index.html
+
+=== ESTRUCTURA DE ARCHIVOS ===
+.gitignore
+analisis-ui-layout.md
+assets/images/chacra-10.jpg
+assets/images/chacra-4.png
+assets/images/chacra-8.jpg
+assets/images/chacra-9.jpg
+assets/images/grano-cafe.png
+assets/images/la_milonga.png
+assets/images/vi-0-web.webp
+assets/images/vi-1-web-nv.webp
+assets/images/vi-1-web.webp
+assets/images/vi-2-web-nv.webp
+assets/images/vi-2-web.webp
+assets/images/vi-3-web-nv.webp
+assets/images/vi-3-web.webp
+assets/images/vi-4-web-nv.webp
+assets/images/vi-4-web.webp
+assets/images/vi-5-web-nv.webp
+assets/images/vi-5-web.webp
+chacra-6.jpg
+chacra-9.jpg
+chacra-video-1.mp4
+chacra-video-2.mp4
+chacra-video-3.mp4
+css/components/assets/images/camara.png
+css/components/assets/images/formulario.png
+css/components/assets/images/inicio.png
+css/components/assets/images/instagram.png
+css/components/assets/images/ubicacion.png
+css/components/gallery.css
+css/components/info-panel.css
+css/layout.css
+css/reset.css
+css/typography.css
+css/variables.css
+doc/DESIGN_SYSTEM.md
+doc/MASTER.md
+doc/TECH_SPEC.md
+elementos_web.md
+index.html
+js/main.js
+js/modules/GalleryController.js
+js/modules/IntroController.js
+js/modules/MapHandler.js
+mostrar_contenido_v1.sh
+
+=== ARCHIVOS COMPLETOS ===
+--- js/modules/IntroController.js (completo) ---
+// js/modules/IntroController.js — Controlador de la secuencia de introducción
+
+class IntroController {
+    /**
+     * @param {string} coverSelector    - Selector CSS del nodo de estado cover   (ej. '#app-state-cover')
+     * @param {string} introSelector    - Selector CSS del nodo de estado intro    (ej. '#app-state-intro')
+     * @param {string} mainSelector     - Selector CSS del nodo de estado principal (ej. '#app-state-main')
+     * @param {string} trackSelector    - Selector CSS del contenedor de slides     (ej. '.comic-track')
+     * @param {string} startBtnSelector - Selector CSS del botón de inicio del cómic (ej. '#btn-start-comic')
+     */
+    constructor(coverSelector, introSelector, mainSelector, trackSelector, startBtnSelector) {
+        this._nodeCover    = document.querySelector(coverSelector);
+        this._nodeIntro    = document.querySelector(introSelector);
+        this._nodeMain     = document.querySelector(mainSelector);
+        this._nodeTrack    = document.querySelector(trackSelector);
+        this._nodeStartBtn = document.querySelector(startBtnSelector);
+
+        this._nodeBtnPrev  = document.querySelector('.comic-btn--prev');
+        this._nodeBtnNext  = document.querySelector('.comic-btn--next');
+        this._nodeDotsWrap = document.querySelector('.comic-dots'); // Mutación: Puntero al contenedor de dots
+        this._nodeBtnHome  = document.querySelector('#btn-go-home');
+        this._nodeBtnBackToLastComic = document.querySelector('#btn-back-to-last-comic');
+        this._nodeComicControls = document.querySelector('.comic-controls');
+
+        if (!this._nodeCover || !this._nodeIntro || !this._nodeMain || !this._nodeTrack) {
+            console.warn('IntroController: fallo en la resolución de nodos requeridos.');
+            return;
+        }
+
+        this._slides      = Array.from(this._nodeTrack.querySelectorAll('.comic-slide'));
+        this._totalSlides = this._slides.length + 1;
+
+        this._currentIndex = 0;
+        this._buildDots();   // Mutación: Inyección dinámica del modelo de dots
+        this._renderState();
+        this._mapEvents();
+    }
+
+    // ── Mutación: Construcción dinámica de nodos indicadores ──────────────
+    _buildDots() {
+        if (!this._nodeDotsWrap) return;
+        this._nodeDotsWrap.innerHTML = ''; // Limpieza de estado residual
+
+        this._dots = [];
+        for (let i = 0; i < this._totalSlides; i++) {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'comic-dot';
+            btn.setAttribute('role', 'tab');
+            btn.setAttribute('aria-label', `Ir a viñeta ${i + 1}`);
+            btn.setAttribute('aria-selected', 'false');
+            btn.dataset.index = i;
+            this._nodeDotsWrap.appendChild(btn);
+            this._dots.push(btn);
+        }
+    }
+
+    // ── Mapeo de eventos ───────────────────────────────────────────────────
+    _mapEvents() {
+        if (this._nodeStartBtn) {
+            this._nodeStartBtn.addEventListener('click', this._onStartClick.bind(this));
+        }
+
+        if (this._nodeBtnHome) {
+            this._nodeBtnHome.addEventListener('click', this._goHome.bind(this));
+        }
+
+        if (this._nodeBtnBackToLastComic) {
+            this._nodeBtnBackToLastComic.addEventListener('click', this._goToLastComic.bind(this));
+        }
+
+        // Delegación de eventos bidireccionales — stopPropagation evita
+        // que el clic sobre el botón active también el handler del track.
+        if (this._nodeBtnPrev) {
+            this._nodeBtnPrev.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this._goPrev();
+            });
+        }
+
+        if (this._nodeBtnNext) {
+            this._nodeBtnNext.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this._goNext();
+            });
+        }
+
+        // Fallback de navegación directa sobre el track principal
+        this._nodeTrack.addEventListener('click', this._goNext.bind(this));
+
+        // Mutación: Delegación de eventos para navegación arbitraria mediante dots
+        if (this._nodeDotsWrap) {
+            this._nodeDotsWrap.addEventListener('click', (e) => {
+                const dot = e.target.closest('.comic-dot');
+                if (dot) {
+                    e.stopPropagation();
+                    this._currentIndex = Number(dot.dataset.index);
+                    this._renderState();
+                }
+            });
+        }
+
+        // Navegación por teclado: flecha derecha avanza, flecha izquierda retrocede.
+        // Actúa si la vista intro o la vista main están activas; se bloquea
+        // únicamente cuando ambas están ocultas (es decir, estamos en cover).
+        document.addEventListener('keydown', (e) => {
+            const introHidden = this._nodeIntro.classList.contains('is-hidden');
+            const mainHidden = this._nodeMain.classList.contains('is-hidden');
+            if (introHidden && mainHidden) return;
+            if (e.key === 'ArrowRight') {
+                this._goNext();
+            } else if (e.key === 'ArrowLeft') {
+                this._goPrev();
+            }
+        });
+
+        // Navegación táctil (swipe) sobre el track de imágenes.
+        // Swipe derecha→izquierda avanza, swipe izquierda→derecha retrocede.
+        // Umbral mínimo de 50px para distinguir un swipe real de un tap;
+        // si no se supera el umbral, no se interviene y el click de fallback
+        // existente sobre _nodeTrack sigue manejando el tap normalmente.
+        this._touchStartX = 0;
+        this._touchStartY = 0;
+        const SWIPE_THRESHOLD = 50;
+
+        this._nodeTrack.addEventListener('touchstart', (e) => {
+            this._touchStartX = e.changedTouches[0].screenX;
+            this._touchStartY = e.changedTouches[0].screenY;
+        });
+
+        this._nodeTrack.addEventListener('touchend', (e) => {
+            const touchEndX = e.changedTouches[0].screenX;
+            const touchEndY = e.changedTouches[0].screenY;
+            const deltaX = touchEndX - this._touchStartX;
+            const deltaY = touchEndY - this._touchStartY;
+
+            if (Math.abs(deltaX) > SWIPE_THRESHOLD && Math.abs(deltaX) > Math.abs(deltaY)) {
+                e.stopPropagation();
+                if (deltaX < 0) {
+                    this._goNext();
+                } else {
+                    this._goPrev();
+                }
+            }
+        });
+    }
+
+    // ── Handler: clic en #btn-start-comic ─────────────────────────────────
+    _onStartClick() {
+        this._nodeCover.classList.add('is-hidden');
+        this._nodeIntro.classList.remove('is-hidden');
+        if (this._nodeBtnHome) this._nodeBtnHome.classList.remove('is-hidden');
+        if (this._nodeComicControls) this._nodeComicControls.classList.remove('is-hidden');
+    }
+
+    // ── Transición direccional inversa ─────────────────────────────────────────
+    _goPrev() {
+        // Mutación: Transmutación al estado Cover si el índice es 0
+        if (this._currentIndex === 0) {
+            this._transitionToCover();
+            return;
+        }
+        this._currentIndex -= 1;
+        this._renderState();
+    }
+
+    // ── Transición direccional directa ─────────────────────────────────────
+    _goNext() {
+        if (this._currentIndex === this._totalSlides - 1) return;
+        this._currentIndex += 1;
+        this._renderState();
+    }
+
+    // ── Motor de resolución de clases de estado CSS ────────────────────────
+    _renderState() {
+        if (this._currentIndex < this._slides.length) {
+            this._nodeIntro.classList.remove('is-hidden');
+            this._nodeMain.classList.add('is-hidden');
+            if (this._nodeComicControls) this._nodeComicControls.classList.remove('comic-controls--main-state');
+            // Renderizado del track de imágenes
+            this._slides.forEach((slide, index) => {
+                slide.classList.remove('is-active', 'is-past');
+
+                if (index === this._currentIndex) {
+                    slide.classList.add('is-active');
+                } else if (index < this._currentIndex) {
+                    slide.classList.add('is-past');
+                }
+                // index > this._currentIndex → sin clase → translateX(150vw) por defecto CSS
+            });
+        } else if (this._currentIndex === this._slides.length) {
+            this._nodeIntro.classList.add('is-hidden');
+            this._nodeMain.classList.remove('is-hidden');
+            if (this._nodeComicControls) this._nodeComicControls.classList.add('comic-controls--main-state');
+        }
+
+        // Mutación: Sincronización de estado de indicadores (dots)
+        if (this._dots) {
+            this._dots.forEach((dot, index) => {
+                const isActive = index === this._currentIndex;
+                dot.classList.toggle('is-active', isActive);
+                dot.setAttribute('aria-selected', isActive ? 'true' : 'false');
+            });
+        }
+
+        if (this._nodeBtnBackToLastComic) {
+            this._nodeBtnBackToLastComic.classList.toggle('is-hidden', this._nodeMain.classList.contains('is-hidden'));
+        }
+
+        if (this._nodeBtnNext) {
+            this._nodeBtnNext.disabled = (this._currentIndex === this._totalSlides - 1);
+        }
+    }
+
+    // ── Mutación: Transición de estado global inversa (Intro → Cover) ──────────
+    _transitionToCover() {
+        this._nodeIntro.classList.add('is-hidden');
+        this._nodeCover.classList.remove('is-hidden');
+        if (this._nodeBtnHome) this._nodeBtnHome.classList.add('is-hidden');
+        if (this._nodeComicControls) this._nodeComicControls.classList.add('is-hidden');
+    }
+
+    _goHome() {
+        this._nodeMain.classList.add('is-hidden');
+        this._nodeIntro.classList.add('is-hidden');
+        this._nodeCover.classList.remove('is-hidden');
+        if (this._nodeBtnHome) this._nodeBtnHome.classList.add('is-hidden');
+        if (this._nodeComicControls) this._nodeComicControls.classList.add('is-hidden');
+        this._currentIndex = 0;
+        this._renderState();
+    }
+
+    _goToLastComic() {
+        this._currentIndex = this._slides.length - 1;
+        this._renderState();
+    }
+
+
+}
+
+export default IntroController;
+
+--- css/reset.css (completo) ---
+/* css/reset.css — Reset mínimo */
+
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+body, h1, h2, h3, h4, h5, h6,
+p, ul, ol, li, figure, figcaption,
+blockquote, dl, dd {
+    margin: 0;
+    padding: 0;
+}
+
+html, body {
+    width: 100%;
+}
+
+img {
+    display: block;
+    max-width: 100%;
+}
+
+button {
+    appearance: none;
+    -webkit-appearance: none;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    font: inherit;
+    color: inherit;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+--- css/variables.css (completo) ---
+/* css/variables.css — Design System & Design Tokens */
+
+:root {
+    /* Paleta Base (Placeholder - Extraer de PDF) */
+    --color-bg-primary: #FFFFFF;
+    --color-bg-secondary: #F8F9FA;
+    /* Para estados hover o separaciones sutiles */
+    --color-text-primary: #1A1A1A;
+    --color-text-secondary: #4A4A4A;
+    --color-accent: #E5D5C5;
+    /* Tono derivado del café/madera para acentos */
+
+    /* Tipografía */
+    --font-primary: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    /* Elegante, sans-serif */
+    --font-secondary: 'Georgia', serif;
+    /* Para citas o énfasis muy puntuales */
+
+    /* Escala Tipográfica (Rem-based, asumiendo base 16px) */
+    --text-xs: 0.75rem;
+    --text-sm: 0.875rem;
+    --text-base: 1rem;
+    --text-lg: 1.25rem;
+    --text-xl: 1.5rem;
+    --text-2xl: 2.25rem;
+
+    /* Espaciado (Sistema de 8px) */
+    --space-2: 0.125rem;
+    --space-4: 0.25rem;
+    --space-8: 0.5rem;
+    --space-16: 1rem;
+    --space-24: 1.5rem;
+    --space-32: 2rem;
+    --space-48: 3rem;
+    --space-64: 4rem;
+
+    /* Transiciones */
+    --transition-smooth: 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+
+    /* Opacidad del Patrón Temático */
+    /* --pattern-opacity: 0.95; */
+
+    /* Paleta muestreada del mockup */
+    --color-cream-bg: #F8E4B5;
+    --color-panel-right: #E4CB9E;
+    --color-brown-dark: #3B2A1A;
+    --color-brown-mid: #5B4123;
+    --color-brown-soft: #7A5A3A;
+    --color-divider: rgba(59, 42, 26, 0.25);
+}
+--- css/typography.css (completo) ---
+/* css/typography.css — Base tipográfica */
+
+body {
+    font-family: var(--font-primary);
+    font-size: var(--text-base);
+    line-height: 1.5;
+    color: var(--color-brown-dark);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+--- index.html (completo) ---
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Información logística y visual del salón de eventos — Nuestra Boda">
+    <title>Nuestra Boda | Salón de Eventos</title>
+
+    <!-- Precarga de la imagen principal de la galería (TECH_SPEC.md: assets/images — WebP/AVIF optimizados) -->
+    <link rel="preload" as="image" href="assets/images/chacra-8.jpg" type="image/jpeg">
+
+    <!-- Tipografías web: Cormorant Garamond (serif) + Arimo (sans-serif) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Arimo:wght@400;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,700;1,300&display=swap">
+
+    <!-- Hojas de estilo (TECH_SPEC.md: estructura del sistema de archivos) -->
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/reset.css">
+    <link rel="stylesheet" href="css/typography.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/components/gallery.css">
+    <link rel="stylesheet" href="css/components/info-panel.css">
+
+    <!-- Entry point ES6 Module -->
+    <script type="module" src="js/main.js"></script>
+</head>
+
+<body>
+
+    <!-- Estado de cubierta: pantalla de presentación inicial -->
+    <section id="app-state-cover" class="cover-sequence">
+        <div class="cover-sequence__inner">
+            <p class="cover-sequence__eyebrow">ACÁ COMIENZA NUESTRA HISTORIA LOCA</p>
+            <hr class="cover-sequence__divider">
+            <h1 class="cover-sequence__title">
+                <span class="cover-sequence__dropcap">J</span>untos atravesamos distintos desafíos<br>
+                y también celebramos muchas victorias.
+            </h1>
+            <p class="cover-sequence__subtitle">
+                A través de esta historieta, te invitamos<br>
+                a conocer parte de nuestra aventura.
+            </p>
+            <button id="btn-start-comic" class="cover-sequence__cta" type="button" aria-label="Avanzar a la historieta">
+                TOCÁ EL GRANO DE CAFÉ PARA COMENZAR EL RECORRIDO
+                <img src="assets/images/grano-cafe.png" class="cover-sequence__cta-icon" alt="" aria-hidden="true"
+                    draggable="false">
+            </button>
+        </div>
+    </section>
+
+
+    <!-- Estado inicial: secuencia de viñetas cómicas -->
+    <section id="app-state-intro" class="comic-sequence is-hidden">
+
+        <div class="comic-track">
+            <img class="comic-slide is-active" src="assets/images/vi-1-web-nv.webp" alt="Viñeta 1 de 5"
+                draggable="false">
+            <img class="comic-slide" src="assets/images/vi-2-web-nv.webp" alt="Viñeta 2 de 5" draggable="false">
+            <img class="comic-slide" src="assets/images/vi-3-web-nv.webp" alt="Viñeta 3 de 5" draggable="false">
+            <img class="comic-slide" src="assets/images/vi-4-web-nv.webp" alt="Viñeta 4 de 5" draggable="false">
+            <img class="comic-slide" src="assets/images/vi-5-web-nv.webp" alt="Viñeta 5 de 5" draggable="false">
+        </div>
+
+    </section>
+
+
+    <!-- Estado principal: layout split-screen (oculto hasta completar intro) -->
+    <div id="app-state-main" class="is-hidden">
+
+        <!-- Layout Split-Screen: Desktop 60vw/40vw -->
+        <main class="layout-split">
+
+            <!-- Panel Izquierdo (60vw): Galería fotográfica inmersiva en Grid -->
+            <section class="layout-split__gallery" aria-label="Galería fotográfica del predio">
+                <figure class="gallery-grid">
+
+                    <div class="gallery-grid__track" aria-live="polite">
+                        <img class="gallery-grid__slide" src="assets/images/chacra-8.jpg" alt="Vista exterior 1" draggable="false">
+                        <img class="gallery-grid__slide" src="assets/images/chacra-10.jpg" alt="Vista exterior 2" draggable="false">
+                        <img class="gallery-grid__slide" src="assets/images/chacra-4.png" alt="Vista exterior 3" draggable="false">
+                        <img class="gallery-grid__slide" src="assets/images/chacra-9.jpg" alt="Vista exterior 4" draggable="false">
+
+                        <div class="gallery-grid__zoom is-hidden">
+                            <img class="gallery-grid__zoom-img" src="" alt="" draggable="false">
+                            <button class="gallery-grid__zoom-close" type="button" aria-label="Cerrar imagen ampliada">
+                                <svg class="gallery-grid__zoom-close-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                    <polyline points="15 18 9 12 15 6" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+
+
+                </figure>
+            </section>
+
+            <!-- Panel Derecho (40vw): Contenedor de información con degradado -->
+            <section class="layout-split__info venue-info" aria-label="Información del evento">
+
+                <div class="venue-info__logo-wrapper">
+                    <img src="assets/images/la_milonga.png" class="venue-info__logo" alt="Logo Chacra La Milonga"
+                        draggable="false">
+                </div>
+
+                <div class="venue-info__body">
+                    <p class="venue-info__address">
+                        Leandro N. Alem S/N, Esteban Echeverría,<br>
+                        Provincia de Buenos Aires
+                    </p>
+                </div>
+
+                <div class="venue-info__actions">
+                    <nav class="venue-info__links" aria-label="Enlaces logísticos">
+                        <a href="https://maps.app.goo.gl/bbEqqj2s4zFuCF2G6" class="venue-link" target="_blank"
+                            rel="noopener noreferrer">
+                            <div class="venue-icon-mask venue-link__icon"
+                                style="--icon-url: url('assets/images/ubicacion.png');"></div>
+                            <span>Cómo llegar</span>
+                        </a>
+                        <a href="https://www.instagram.com/chacra.lamilonga/" class="venue-link" target="_blank"
+                            rel="noopener noreferrer">
+                            <div class="venue-icon-mask venue-link__icon"
+                                style="--icon-url: url('assets/images/instagram.png');"></div>
+                            <span>Ver en Instagram</span>
+                        </a>
+                        <a href="https://www.youtube.com/watch?v=p4I1z1CKYNY" class="venue-link" target="_blank"
+                            rel="noopener noreferrer">
+                            <div class="venue-icon-mask venue-link__icon"
+                                style="--icon-url: url('assets/images/camara.png');"></div>
+                            <span>Recorrer el predio</span>
+                        </a>
+                    </nav>
+
+                    <hr class="venue-info__divider">
+
+                    <div class="venue-info__form-section">
+                        <a href="https://docs.google.com/forms/d/e/1FAIpQLSfBRKIAf1oDwaejlKdOXCIsbNqcPuWyjJV8ddQSY6-H5wIhkg/viewform"
+                            target="_blank" rel="noopener noreferrer" class="venue-form-btn"
+                            aria-label="Abrir formulario de asistencia">
+                            <div class="venue-icon-mask venue-form-btn__icon"
+                                style="--icon-url: url('assets/images/formulario.png');"></div>
+                            <span>Formulario de asistencia y<br>consideraciones alimentarias</span>
+                        </a>
+                    </div>
+                </div>
+
+            </section>
+
+        </main>
+    </div><!-- /#app-state-main -->
+
+    <!-- Mutación: Inyección de panel de controles laterales absolutos -->
+    <nav class="comic-controls is-hidden" aria-label="Controles de navegación de la historieta">
+        <button class="comic-btn comic-btn--prev" type="button" aria-label="Viñeta anterior">
+            <svg class="comic-btn-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <polyline points="15 18 9 12 15 6" />
+            </svg>
+        </button>
+        <button id="btn-go-home" class="btn-inicio is-hidden" type="button" aria-label="Volver al inicio">
+            <div class="venue-icon-mask btn-inicio__icon" style="--icon-url: url('assets/images/inicio.png');"></div>
+        </button>
+        <div class="comic-dots" role="tablist" aria-label="Indicadores de viñeta">
+            <!-- Nodos generados dinámicamente vía IntroController.js -->
+        </div>
+        <button class="comic-btn comic-btn--next" type="button" aria-label="Viñeta siguiente">
+            <svg class="comic-btn-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <polyline points="9 18 15 12 9 6" />
+            </svg>
+        </button>
+    </nav>
+</body>
+
+</html>
+
+=== CSS (reglas relevantes) ===
+### css/layout.css
+/* css/layout.css — Arquitectura Split-Screen (Desktop) / Stacking (Mobile) */
+
+/*
+ * Mobile-first (Viewport < 1024px):
+ * Flujo de bloque estándar (Stacking).
+ * Galería en el tercio superior, seguido del panel de información.
+ */
+body {
+    position: relative;
+    background-color: var(--color-cream-bg);
+}
+
+/* ─── Capa de fondo global (vi-0: portada) ───────────────────────────────────
+ * Pseudo-elemento fijo proyectado sobre el viewport detrás del contenido.
+ * z-index: 0 → Fondo real, no superposición.
+ * pointer-events: none → Anulación de intercepción de matriz de eventos.
+ * ─────────────────────────────────────────────────────────────────────────── */
+body::before {
+    opacity: 1;
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-image: url('../assets/images/vi-0-web.webp');
+    background-repeat: repeat;
+    background-size: auto;
+    background-position: top left;
+    opacity: var(--pattern-opacity);
+    /* mix-blend-mode: multiply; */
+}
+
+@media (max-width: 1023px) {
+body::before {
+        inset: -50%;
+        transform: scale(0.5);
+    }
+}
+
+body>* {
+    position: relative;
+    z-index: 1;
+}
+
+=== REPORTE ===
+✔ _renderState @ js/modules/IntroController.js → js/modules/IntroController.js (archivo completo: 7)
+✔ constructor @ js/modules/IntroController.js → js/modules/IntroController.js (archivo completo: 1)
+✔ _onStartClick @ js/modules/IntroController.js → js/modules/IntroController.js (archivo completo: 2)
+✔ #app-state-cover @ index.html → index.html (archivo completo: 1)
+✔ #app-state-intro @ index.html → index.html (archivo completo: 1)
+✔ body @ css/reset.css → css/reset.css (archivo completo: 2)
+✔ body @ css/layout.css → css/layout.css (css: 4)
+✔ html @ css/reset.css → css/reset.css (archivo completo: 1)
+✔ js/modules/IntroController.js → incluido completo
+✔ css/reset.css → incluido completo
+✔ css/variables.css → incluido completo
+✔ css/typography.css → incluido completo
+✔ index.html → incluido completo

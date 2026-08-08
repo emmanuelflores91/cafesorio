@@ -11,7 +11,7 @@
 4. **Letra Capitular** (Código: `.cover-sequence__dropcap`): Primera letra destacada
 5. **Subtítulo** (Código: `.cover-sequence__subtitle`): Texto explicativo secundario
 6. **Botón Inicio** (Código: `#btn-start-comic`): Botón arrancar recorrido
-7. **Icono Botón** (Código: `assets/images/grano-cafe.png`): Icono grano café
+7. **Icono Botón** (Código: `.cover-sequence__cta-icon`): Icono grano café
 
 ## Secuencia de Historieta (Intro)
 8. **Contenedor Historieta** (Código: `.comic-track`): Caja de viñetas
@@ -26,22 +26,24 @@
 15. **Icono Cerrar** (Código: `.gallery-grid__zoom-close-icon`): Icono cruz cierre
 
 ## Panel de Información (Principal Derecho)
-16. **Logotipo Predio** (Código: `assets/images/la_milonga.png`): Logo del salón
+16. **Logotipo Predio** (Código: `.venue-info__logo`): Logo del salón
 17. **Texto Dirección** (Código: `.venue-info__address`): Ubicación del lugar
 18. **Enlace Ubicación** (Código: `.venue-link`): Link a mapas
-19. **Icono Ubicación** (Código: `assets/images/ubicacion.png`): Icono pin mapa
+19. **Icono Ubicación** (Código: `.venue-link__icon`): Icono pin mapa
 20. **Enlace Instagram** (Código: `.venue-link`): Link red social
-21. **Icono Instagram** (Código: `assets/images/instagram.png`): Icono cámara Instagram
+21. **Icono Instagram** (Código: `.venue-link__icon`): Icono cámara Instagram
 22. **Enlace Video** (Código: `.venue-link`): Link recorrido visual
-23. **Icono Video** (Código: `assets/images/camara.png`): Icono reproducción video
+23. **Icono Video** (Código: `.venue-link__icon`): Icono reproducción video
 24. **Divisor Vertical** (Código: `.venue-info__divider`): Línea separadora acciones
 25. **Botón Formulario** (Código: `.venue-form-btn`): Link asistencia dieta
-26. **Icono Formulario** (Código: `assets/images/formulario.png`): Icono documento web
+26. **Icono Formulario** (Código: `.venue-form-btn__icon`): Icono documento web
+33. **Navegación Enlaces** (Código: `.venue-info__links`): Contenedor de links
 
 ## Controles de Navegación (Global)
 27. **Barra Controles** (Código: `.comic-controls`): Contenedor botones navegación
 28. **Botón Anterior** (Código: `.comic-btn--prev`): Retroceder una viñeta
 29. **Botón Inicio** (Código: `#btn-go-home`): Volver a portada
-30. **Icono Inicio** (Código: `assets/images/inicio.png`): Icono casa inicio
+30. **Icono Inicio** (Código: `.btn-inicio__icon`): Icono casa inicio
 31. **Indicadores Progreso** (Código: `.comic-dots`): Puntos de avance
 32. **Botón Siguiente** (Código: `.comic-btn--next`): Avanzar una viñeta
+34. **Icono Navegación** (Código: `.comic-btn-icon`): Icono flecha dirección
