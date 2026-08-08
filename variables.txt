@@ -1,17 +1,10 @@
 # variables.txt — generado por Gemini
 
 [TERMINOS]
-_renderState @ js/modules/IntroController.js
-_mapEvents @ js/modules/IntroController.js
-_openComicZoom @ js/modules/IntroController.js
-_closeComicZoom @ js/modules/IntroController.js
-_openZoom @ js/modules/GalleryController.js
-_closeZoom @ js/modules/GalleryController.js
-.comic-slide @ css/layout.css
-.gallery-grid__zoom @ css/components/gallery.css
-.gallery-grid__zoom-img @ css/components/gallery.css
 #app-state-intro @ index.html
-#app-state-main @ index.html
+.comic-track
+.comic-slide
+.comic-slide__caption @ css/layout.css
 
 [ARCHIVOS_COMPLETOS]
 

@@ -287,8 +287,10 @@ class IntroController {
     // ── Zoom de viñeta a pantalla completa (double-tap) ─────────────────────
     _openComicZoom(slide) {
         if (!this._nodeComicZoom || !this._nodeComicZoomImg) return;
-        this._nodeComicZoomImg.src = slide.src;
-        this._nodeComicZoomImg.alt = slide.alt;
+        const imgNode = slide.tagName === 'IMG' ? slide : slide.querySelector('img');
+        if (!imgNode) return;
+        this._nodeComicZoomImg.src = imgNode.src;
+        this._nodeComicZoomImg.alt = imgNode.alt;
         this._nodeComicZoomImg.style.objectFit = 'contain';
         this._nodeComicZoom.classList.remove('is-hidden');
         requestAnimationFrame(() => {

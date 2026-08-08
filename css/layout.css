@@ -153,6 +153,28 @@ body>* {
     box-shadow: 0 8px 35px 3px rgba(0, 0, 0, 0.74);
 }
 
+.comic-slide-img {
+    width: 100%;
+    height: 100%;
+    object-fit: fill;
+    display: block;
+}
+
+.comic-slide__caption {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    max-width: 300px;
+    background-color: #f1d4a3;
+    border: 4px solid #000000;
+    font-family: 'Segoe Print', 'Comic Sans MS', cursive;
+    text-transform: uppercase;
+    text-align: center;
+    white-space: normal;
+    padding: 16px 20px;
+    z-index: 2;
+}
+
 /* ─── Estado activo del slide (Viewport central) ──────────────────────────────── */
 .comic-slide.is-active {
     transform: translateX(0);
