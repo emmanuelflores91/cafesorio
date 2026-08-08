@@ -110,3 +110,16 @@
     stroke-linejoin: round;
     pointer-events: none;
 }
+
+@media (orientation: landscape) and (width: 874px) and (height: 402px) {
+    .gallery-grid__track {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 8px;
+        width: 98%;
+    }
+
+    .gallery-grid__slide {
+        height: 110px;
+        object-fit: contain;
+    }
+}

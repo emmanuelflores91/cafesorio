@@ -21,6 +21,9 @@ class IntroController {
         this._nodeBtnHome  = document.querySelector('#btn-go-home');
         this._nodeBtnBackToLastComic = document.querySelector('#btn-back-to-last-comic');
         this._nodeComicControls = document.querySelector('.comic-controls');
+        this._nodeComicZoom      = document.querySelector('.comic-zoom');
+        this._nodeComicZoomImg   = this._nodeComicZoom ? this._nodeComicZoom.querySelector('.gallery-grid__zoom-img') : null;
+        this._nodeComicZoomClose = this._nodeComicZoom ? this._nodeComicZoom.querySelector('.gallery-grid__zoom-close') : null;
 
         if (!this._nodeCover || !this._nodeIntro || !this._nodeMain || !this._nodeTrack) {
             console.warn('IntroController: fallo en la resolución de nodos requeridos.');
@@ -85,8 +88,7 @@ class IntroController {
             });
         }
 
-        // Fallback de navegación directa sobre el track principal
-        this._nodeTrack.addEventListener('click', this._goNext.bind(this));
+
 
         // Mutación: Delegación de eventos para navegación arbitraria mediante dots
         if (this._nodeDotsWrap) {
@@ -128,6 +130,9 @@ class IntroController {
             this._touchStartY = e.changedTouches[0].screenY;
         });
 
+        this._lastComicTapTime = 0;
+        const DOUBLE_TAP_THRESHOLD = 300;
+
         this._nodeTrack.addEventListener('touchend', (e) => {
             const touchEndX = e.changedTouches[0].screenX;
             const touchEndY = e.changedTouches[0].screenY;
@@ -141,6 +146,51 @@ class IntroController {
                 } else {
                     this._goPrev();
                 }
+                return;
+            }
+
+            const now = Date.now();
+            const isTap = Math.abs(deltaX) < 10 && Math.abs(deltaY) < 10;
+            if (isTap) {
+                if (now - this._lastComicTapTime < DOUBLE_TAP_THRESHOLD) {
+                    e.stopPropagation();
+                    const slide = e.target.closest('.comic-slide');
+                    if (slide) {
+                        this._openComicZoom(slide);
+                    }
+                    this._lastComicTapTime = 0;
+                } else {
+                    this._lastComicTapTime = now;
+                }
+            }
+        });
+
+        if (this._nodeComicZoomClose) {
+            this._nodeComicZoomClose.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this._closeComicZoom();
+            });
+        }
+
+        // Navegación táctil (swipe) sobre la vista principal.
+        // Swipe izquierda→derecha retrocede al estado anterior.
+        this._mainTouchStartX = 0;
+        this._mainTouchStartY = 0;
+
+        this._nodeMain.addEventListener('touchstart', (e) => {
+            this._mainTouchStartX = e.changedTouches[0].screenX;
+            this._mainTouchStartY = e.changedTouches[0].screenY;
+        });
+
+        this._nodeMain.addEventListener('touchend', (e) => {
+            const touchEndX = e.changedTouches[0].screenX;
+            const touchEndY = e.changedTouches[0].screenY;
+            const deltaX = touchEndX - this._mainTouchStartX;
+            const deltaY = touchEndY - this._mainTouchStartY;
+
+            if (deltaX > SWIPE_THRESHOLD && Math.abs(deltaX) > Math.abs(deltaY)) {
+                e.stopPropagation();
+                this._goPrev();
             }
         });
     }
@@ -220,6 +270,20 @@ class IntroController {
         if (this._nodeBtnNext) {
             this._nodeBtnNext.disabled = (this._currentIndex === this._totalSlides - 1);
         }
+    }
+
+    // ── Zoom de viñeta a pantalla completa (double-tap) ─────────────────────
+    _openComicZoom(slide) {
+        if (!this._nodeComicZoom || !this._nodeComicZoomImg) return;
+        this._nodeComicZoomImg.src = slide.src;
+        this._nodeComicZoomImg.alt = slide.alt;
+        this._nodeComicZoomImg.style.objectFit = 'contain';
+        this._nodeComicZoom.classList.remove('is-hidden');
+    }
+
+    _closeComicZoom() {
+        if (!this._nodeComicZoom) return;
+        this._nodeComicZoom.classList.add('is-hidden');
     }
 
     // ── Mutación: Transición de estado global inversa (Intro → Cover) ──────────

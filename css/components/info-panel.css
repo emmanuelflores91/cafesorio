@@ -224,3 +224,79 @@
     transform: scale(1.15);
     outline: none;
 }
+
+@media (orientation: landscape) and (width: 874px) and (height: 402px) {
+    .venue-info {
+        display: grid;
+        grid-template-columns: 120px 1fr;
+        grid-template-rows: auto auto;
+        align-items: center;
+        justify-content: start;
+        padding: var(--space-16);
+        gap: 4px var(--space-16);
+    }
+
+    .venue-info__body {
+        grid-column: 1;
+        grid-row: 2;
+        flex: 0 0 auto;
+        gap: 8px;
+        max-width: none;
+    }
+
+    .venue-info__logo-wrapper {
+        grid-column: 1;
+        grid-row: 1;
+        margin-top: 0;
+        margin-bottom: 0;
+    }
+
+    .venue-info__logo {
+        width: 100%;
+        max-width: 125px;
+        max-height: none;
+    }
+
+    .venue-info__address {
+        font-size: calc(var(--text-base) * 0.9);
+        line-height: 1.2;
+        text-align: left;
+    }
+
+    .venue-info__actions {
+        grid-column: 2;
+        grid-row: 1 / 3;
+        flex-direction: row;
+        align-items: center;
+        justify-content: flex-start;
+        margin-top: 0;
+        gap: var(--space-16);
+        max-width: none;
+    }
+
+    .venue-info__links {
+        flex: 0 0 40%;
+        flex-direction: column;
+        gap: 14px;
+    }
+
+    .venue-info__divider {
+        width: 1px;
+        height: 70px;
+        align-self: center;
+        border-right: 1px solid var(--color-divider);
+        border-bottom: none;
+    }
+
+    .venue-info__form-section {
+        flex: 1 1 auto;
+        align-items: flex-start;
+        text-align: left;
+    }
+
+    .venue-form-btn {
+        max-width: 260px;
+        padding: 10px 14px;
+        flex-direction: row;
+    }
+}

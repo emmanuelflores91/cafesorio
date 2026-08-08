@@ -169,17 +169,7 @@ body>* {
     gap: 32px;
 }
 
-/* ─── Mobile: nav de galería pegado debajo de la grilla (Viewport < 1024px) ──────── */
-@media (max-width: 1023px) {
-    .comic-controls.comic-controls--main-state {
-        position: absolute;
-        top: calc(33.333vh + 18px);
-        bottom: auto;
-        z-index: 10;
-        transform: scale(0.82);
-        transform-origin: center top;
-    }
-}
+
 
 .comic-btn {
     appearance: none;
@@ -444,4 +434,52 @@ body>* {
 .btn-inicio__icon {
     width: 24px;
     height: 24px;
+}
+
+@media (orientation: landscape) and (width: 874px) and (height: 402px) {
+    .layout-split {
+        flex-direction: column;
+    }
+
+    .layout-split__gallery {
+        width: 100%;
+        height: 40%;
+    }
+
+    .layout-split__info {
+        width: 100%;
+        height: 60%;
+        padding: 0;
+        overflow: hidden;
+    }
+
+    .comic-controls {
+        bottom: 4px;
+        height: 28px;
+        gap: 24px;
+    }
+
+    .comic-dots {
+        gap: 8px;
+    }
+
+    .comic-btn {
+        width: 28px;
+        height: 28px;
+    }
+
+    .comic-btn-icon {
+        width: 18px;
+        height: 18px;
+    }
+
+    .btn-inicio {
+        width: 20px;
+        height: 20px;
+    }
+
+    .btn-inicio__icon {
+        width: 20px;
+        height: 20px;
+    }
 }

@@ -1,7 +1,6 @@
 === EXTRACTO DE PROYECTO ===
-Generado: 2026-08-08T01:59:41.245Z
-Términos: _renderState @ js/modules/IntroController.js, constructor @ js/modules/IntroController.js, _onStartClick @ js/modules/IntroController.js, #app-state-cover @ index.html, #app-state-intro @ index.html, body @ css/reset.css, body @ css/layout.css, html @ css/reset.css
-Archivos completos: js/modules/IntroController.js, css/reset.css, css/variables.css, css/typography.css, index.html
+Generado: 2026-08-08T04:35:12.212Z
+Términos: .layout-split__gallery, .gallery-grid__track, .gallery-grid__slide, .venue-info, .venue-info__logo-wrapper, .venue-info__logo, .venue-info__body, .venue-info__address, .venue-info__actions, .venue-info__links, .venue-info__form-section, .venue-form-btn, .comic-controls, .comic-btn--prev, .comic-btn--next, .comic-dots
 
 === ESTRUCTURA DE ARCHIVOS ===
 .gitignore
@@ -50,430 +49,14 @@ js/modules/IntroController.js
 js/modules/MapHandler.js
 mostrar_contenido_v1.sh
 
-=== ARCHIVOS COMPLETOS ===
---- js/modules/IntroController.js (completo) ---
-// js/modules/IntroController.js — Controlador de la secuencia de introducción
-
-class IntroController {
-    /**
-     * @param {string} coverSelector    - Selector CSS del nodo de estado cover   (ej. '#app-state-cover')
-     * @param {string} introSelector    - Selector CSS del nodo de estado intro    (ej. '#app-state-intro')
-     * @param {string} mainSelector     - Selector CSS del nodo de estado principal (ej. '#app-state-main')
-     * @param {string} trackSelector    - Selector CSS del contenedor de slides     (ej. '.comic-track')
-     * @param {string} startBtnSelector - Selector CSS del botón de inicio del cómic (ej. '#btn-start-comic')
-     */
-    constructor(coverSelector, introSelector, mainSelector, trackSelector, startBtnSelector) {
-        this._nodeCover    = document.querySelector(coverSelector);
-        this._nodeIntro    = document.querySelector(introSelector);
-        this._nodeMain     = document.querySelector(mainSelector);
-        this._nodeTrack    = document.querySelector(trackSelector);
-        this._nodeStartBtn = document.querySelector(startBtnSelector);
-
-        this._nodeBtnPrev  = document.querySelector('.comic-btn--prev');
-        this._nodeBtnNext  = document.querySelector('.comic-btn--next');
-        this._nodeDotsWrap = document.querySelector('.comic-dots'); // Mutación: Puntero al contenedor de dots
-        this._nodeBtnHome  = document.querySelector('#btn-go-home');
-        this._nodeBtnBackToLastComic = document.querySelector('#btn-back-to-last-comic');
-        this._nodeComicControls = document.querySelector('.comic-controls');
-
-        if (!this._nodeCover || !this._nodeIntro || !this._nodeMain || !this._nodeTrack) {
-            console.warn('IntroController: fallo en la resolución de nodos requeridos.');
-            return;
-        }
-
-        this._slides      = Array.from(this._nodeTrack.querySelectorAll('.comic-slide'));
-        this._totalSlides = this._slides.length + 1;
-
-        this._currentIndex = 0;
-        this._buildDots();   // Mutación: Inyección dinámica del modelo de dots
-        this._renderState();
-        this._mapEvents();
-    }
-
-    // ── Mutación: Construcción dinámica de nodos indicadores ──────────────
-    _buildDots() {
-        if (!this._nodeDotsWrap) return;
-        this._nodeDotsWrap.innerHTML = ''; // Limpieza de estado residual
-
-        this._dots = [];
-        for (let i = 0; i < this._totalSlides; i++) {
-            const btn = document.createElement('button');
-            btn.type = 'button';
-            btn.className = 'comic-dot';
-            btn.setAttribute('role', 'tab');
-            btn.setAttribute('aria-label', `Ir a viñeta ${i + 1}`);
-            btn.setAttribute('aria-selected', 'false');
-            btn.dataset.index = i;
-            this._nodeDotsWrap.appendChild(btn);
-            this._dots.push(btn);
-        }
-    }
-
-    // ── Mapeo de eventos ───────────────────────────────────────────────────
-    _mapEvents() {
-        if (this._nodeStartBtn) {
-            this._nodeStartBtn.addEventListener('click', this._onStartClick.bind(this));
-        }
-
-        if (this._nodeBtnHome) {
-            this._nodeBtnHome.addEventListener('click', this._goHome.bind(this));
-        }
-
-        if (this._nodeBtnBackToLastComic) {
-            this._nodeBtnBackToLastComic.addEventListener('click', this._goToLastComic.bind(this));
-        }
-
-        // Delegación de eventos bidireccionales — stopPropagation evita
-        // que el clic sobre el botón active también el handler del track.
-        if (this._nodeBtnPrev) {
-            this._nodeBtnPrev.addEventListener('click', (e) => {
-                e.stopPropagation();
-                this._goPrev();
-            });
-        }
-
-        if (this._nodeBtnNext) {
-            this._nodeBtnNext.addEventListener('click', (e) => {
-                e.stopPropagation();
-                this._goNext();
-            });
-        }
-
-        // Fallback de navegación directa sobre el track principal
-        this._nodeTrack.addEventListener('click', this._goNext.bind(this));
-
-        // Mutación: Delegación de eventos para navegación arbitraria mediante dots
-        if (this._nodeDotsWrap) {
-            this._nodeDotsWrap.addEventListener('click', (e) => {
-                const dot = e.target.closest('.comic-dot');
-                if (dot) {
-                    e.stopPropagation();
-                    this._currentIndex = Number(dot.dataset.index);
-                    this._renderState();
-                }
-            });
-        }
-
-        // Navegación por teclado: flecha derecha avanza, flecha izquierda retrocede.
-        // Actúa si la vista intro o la vista main están activas; se bloquea
-        // únicamente cuando ambas están ocultas (es decir, estamos en cover).
-        document.addEventListener('keydown', (e) => {
-            const introHidden = this._nodeIntro.classList.contains('is-hidden');
-            const mainHidden = this._nodeMain.classList.contains('is-hidden');
-            if (introHidden && mainHidden) return;
-            if (e.key === 'ArrowRight') {
-                this._goNext();
-            } else if (e.key === 'ArrowLeft') {
-                this._goPrev();
-            }
-        });
-
-        // Navegación táctil (swipe) sobre el track de imágenes.
-        // Swipe derecha→izquierda avanza, swipe izquierda→derecha retrocede.
-        // Umbral mínimo de 50px para distinguir un swipe real de un tap;
-        // si no se supera el umbral, no se interviene y el click de fallback
-        // existente sobre _nodeTrack sigue manejando el tap normalmente.
-        this._touchStartX = 0;
-        this._touchStartY = 0;
-        const SWIPE_THRESHOLD = 50;
-
-        this._nodeTrack.addEventListener('touchstart', (e) => {
-            this._touchStartX = e.changedTouches[0].screenX;
-            this._touchStartY = e.changedTouches[0].screenY;
-        });
-
-        this._nodeTrack.addEventListener('touchend', (e) => {
-            const touchEndX = e.changedTouches[0].screenX;
-            const touchEndY = e.changedTouches[0].screenY;
-            const deltaX = touchEndX - this._touchStartX;
-            const deltaY = touchEndY - this._touchStartY;
-
-            if (Math.abs(deltaX) > SWIPE_THRESHOLD && Math.abs(deltaX) > Math.abs(deltaY)) {
-                e.stopPropagation();
-                if (deltaX < 0) {
-                    this._goNext();
-                } else {
-                    this._goPrev();
-                }
-            }
-        });
-    }
-
-    // ── Handler: clic en #btn-start-comic ─────────────────────────────────
-    _onStartClick() {
-        this._nodeCover.classList.add('is-hidden');
-        this._nodeIntro.classList.remove('is-hidden');
-        if (this._nodeBtnHome) this._nodeBtnHome.classList.remove('is-hidden');
-        if (this._nodeComicControls) this._nodeComicControls.classList.remove('is-hidden');
-    }
-
-    // ── Transición direccional inversa ─────────────────────────────────────────
-    _goPrev() {
-        // Mutación: Transmutación al estado Cover si el índice es 0
-        if (this._currentIndex === 0) {
-            this._transitionToCover();
-            return;
-        }
-        this._currentIndex -= 1;
-        this._renderState();
-    }
-
-    // ── Transición direccional directa ─────────────────────────────────────
-    _goNext() {
-        if (this._currentIndex === this._totalSlides - 1) return;
-        this._currentIndex += 1;
-        this._renderState();
-    }
-
-    // ── Motor de resolución de clases de estado CSS ────────────────────────
-    _renderState() {
-        if (this._currentIndex < this._slides.length) {
-            this._nodeIntro.classList.remove('is-hidden');
-            this._nodeMain.classList.add('is-hidden');
-            if (this._nodeComicControls) this._nodeComicControls.classList.remove('comic-controls--main-state');
-            // Renderizado del track de imágenes
-            this._slides.forEach((slide, index) => {
-                slide.classList.remove('is-active', 'is-past');
-
-                if (index === this._currentIndex) {
-                    slide.classList.add('is-active');
-                } else if (index < this._currentIndex) {
-                    slide.classList.add('is-past');
-                }
-                // index > this._currentIndex → sin clase → translateX(150vw) por defecto CSS
-            });
-        } else if (this._currentIndex === this._slides.length) {
-            this._nodeIntro.classList.add('is-hidden');
-            this._nodeMain.classList.remove('is-hidden');
-            if (this._nodeComicControls) this._nodeComicControls.classList.add('comic-controls--main-state');
-        }
-
-        // Mutación: Sincronización de estado de indicadores (dots)
-        if (this._dots) {
-            this._dots.forEach((dot, index) => {
-                const isActive = index === this._currentIndex;
-                dot.classList.toggle('is-active', isActive);
-                dot.setAttribute('aria-selected', isActive ? 'true' : 'false');
-            });
-        }
-
-        if (this._nodeBtnBackToLastComic) {
-            this._nodeBtnBackToLastComic.classList.toggle('is-hidden', this._nodeMain.classList.contains('is-hidden'));
-        }
-
-        if (this._nodeBtnNext) {
-            this._nodeBtnNext.disabled = (this._currentIndex === this._totalSlides - 1);
-        }
-    }
-
-    // ── Mutación: Transición de estado global inversa (Intro → Cover) ──────────
-    _transitionToCover() {
-        this._nodeIntro.classList.add('is-hidden');
-        this._nodeCover.classList.remove('is-hidden');
-        if (this._nodeBtnHome) this._nodeBtnHome.classList.add('is-hidden');
-        if (this._nodeComicControls) this._nodeComicControls.classList.add('is-hidden');
-    }
-
-    _goHome() {
-        this._nodeMain.classList.add('is-hidden');
-        this._nodeIntro.classList.add('is-hidden');
-        this._nodeCover.classList.remove('is-hidden');
-        if (this._nodeBtnHome) this._nodeBtnHome.classList.add('is-hidden');
-        if (this._nodeComicControls) this._nodeComicControls.classList.add('is-hidden');
-        this._currentIndex = 0;
-        this._renderState();
-    }
-
-    _goToLastComic() {
-        this._currentIndex = this._slides.length - 1;
-        this._renderState();
-    }
-
-
-}
-
-export default IntroController;
-
---- css/reset.css (completo) ---
-/* css/reset.css — Reset mínimo */
-
-*, *::before, *::after {
-    box-sizing: border-box;
-}
-
-body, h1, h2, h3, h4, h5, h6,
-p, ul, ol, li, figure, figcaption,
-blockquote, dl, dd {
-    margin: 0;
-    padding: 0;
-}
-
-html, body {
-    width: 100%;
-}
-
-img {
-    display: block;
-    max-width: 100%;
-}
-
-button {
-    appearance: none;
-    -webkit-appearance: none;
-    background: none;
-    border: none;
-    padding: 0;
-    cursor: pointer;
-    font: inherit;
-    color: inherit;
-}
-
-a {
-    color: inherit;
-    text-decoration: none;
-}
-
---- css/variables.css (completo) ---
-/* css/variables.css — Design System & Design Tokens */
-
-:root {
-    /* Paleta Base (Placeholder - Extraer de PDF) */
-    --color-bg-primary: #FFFFFF;
-    --color-bg-secondary: #F8F9FA;
-    /* Para estados hover o separaciones sutiles */
-    --color-text-primary: #1A1A1A;
-    --color-text-secondary: #4A4A4A;
-    --color-accent: #E5D5C5;
-    /* Tono derivado del café/madera para acentos */
-
-    /* Tipografía */
-    --font-primary: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    /* Elegante, sans-serif */
-    --font-secondary: 'Georgia', serif;
-    /* Para citas o énfasis muy puntuales */
-
-    /* Escala Tipográfica (Rem-based, asumiendo base 16px) */
-    --text-xs: 0.75rem;
-    --text-sm: 0.875rem;
-    --text-base: 1rem;
-    --text-lg: 1.25rem;
-    --text-xl: 1.5rem;
-    --text-2xl: 2.25rem;
-
-    /* Espaciado (Sistema de 8px) */
-    --space-2: 0.125rem;
-    --space-4: 0.25rem;
-    --space-8: 0.5rem;
-    --space-16: 1rem;
-    --space-24: 1.5rem;
-    --space-32: 2rem;
-    --space-48: 3rem;
-    --space-64: 4rem;
-
-    /* Transiciones */
-    --transition-smooth: 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-
-    /* Opacidad del Patrón Temático */
-    /* --pattern-opacity: 0.95; */
-
-    /* Paleta muestreada del mockup */
-    --color-cream-bg: #F8E4B5;
-    --color-panel-right: #E4CB9E;
-    --color-brown-dark: #3B2A1A;
-    --color-brown-mid: #5B4123;
-    --color-brown-soft: #7A5A3A;
-    --color-divider: rgba(59, 42, 26, 0.25);
-}
---- css/typography.css (completo) ---
-/* css/typography.css — Base tipográfica */
-
-body {
-    font-family: var(--font-primary);
-    font-size: var(--text-base);
-    line-height: 1.5;
-    color: var(--color-brown-dark);
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-}
-
---- index.html (completo) ---
-<!DOCTYPE html>
-<html lang="es">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Información logística y visual del salón de eventos — Nuestra Boda">
-    <title>Nuestra Boda | Salón de Eventos</title>
-
-    <!-- Precarga de la imagen principal de la galería (TECH_SPEC.md: assets/images — WebP/AVIF optimizados) -->
-    <link rel="preload" as="image" href="assets/images/chacra-8.jpg" type="image/jpeg">
-
-    <!-- Tipografías web: Cormorant Garamond (serif) + Arimo (sans-serif) -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Arimo:wght@400;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,700;1,300&display=swap">
-
-    <!-- Hojas de estilo (TECH_SPEC.md: estructura del sistema de archivos) -->
-    <link rel="stylesheet" href="css/variables.css">
-    <link rel="stylesheet" href="css/reset.css">
-    <link rel="stylesheet" href="css/typography.css">
-    <link rel="stylesheet" href="css/layout.css">
-    <link rel="stylesheet" href="css/components/gallery.css">
-    <link rel="stylesheet" href="css/components/info-panel.css">
-
-    <!-- Entry point ES6 Module -->
-    <script type="module" src="js/main.js"></script>
-</head>
-
-<body>
-
-    <!-- Estado de cubierta: pantalla de presentación inicial -->
-    <section id="app-state-cover" class="cover-sequence">
-        <div class="cover-sequence__inner">
-            <p class="cover-sequence__eyebrow">ACÁ COMIENZA NUESTRA HISTORIA LOCA</p>
-            <hr class="cover-sequence__divider">
-            <h1 class="cover-sequence__title">
-                <span class="cover-sequence__dropcap">J</span>untos atravesamos distintos desafíos<br>
-                y también celebramos muchas victorias.
-            </h1>
-            <p class="cover-sequence__subtitle">
-                A través de esta historieta, te invitamos<br>
-                a conocer parte de nuestra aventura.
-            </p>
-            <button id="btn-start-comic" class="cover-sequence__cta" type="button" aria-label="Avanzar a la historieta">
-                TOCÁ EL GRANO DE CAFÉ PARA COMENZAR EL RECORRIDO
-                <img src="assets/images/grano-cafe.png" class="cover-sequence__cta-icon" alt="" aria-hidden="true"
-                    draggable="false">
-            </button>
-        </div>
-    </section>
-
-
-    <!-- Estado inicial: secuencia de viñetas cómicas -->
-    <section id="app-state-intro" class="comic-sequence is-hidden">
-
-        <div class="comic-track">
-            <img class="comic-slide is-active" src="assets/images/vi-1-web-nv.webp" alt="Viñeta 1 de 5"
-                draggable="false">
-            <img class="comic-slide" src="assets/images/vi-2-web-nv.webp" alt="Viñeta 2 de 5" draggable="false">
-            <img class="comic-slide" src="assets/images/vi-3-web-nv.webp" alt="Viñeta 3 de 5" draggable="false">
-            <img class="comic-slide" src="assets/images/vi-4-web-nv.webp" alt="Viñeta 4 de 5" draggable="false">
-            <img class="comic-slide" src="assets/images/vi-5-web-nv.webp" alt="Viñeta 5 de 5" draggable="false">
-        </div>
-
-    </section>
-
-
-    <!-- Estado principal: layout split-screen (oculto hasta completar intro) -->
-    <div id="app-state-main" class="is-hidden">
-
-        <!-- Layout Split-Screen: Desktop 60vw/40vw -->
-        <main class="layout-split">
-
-            <!-- Panel Izquierdo (60vw): Galería fotográfica inmersiva en Grid -->
-            <section class="layout-split__gallery" aria-label="Galería fotográfica del predio">
+=== HTML (extractos) ===
+### index.html
+--- <section> coincide con .layout-split__gallery (líneas 86-108) ---
+  <!-- ANCESTRO: <html lang="es"> -->
+  <!-- ANCESTRO: <body> -->
+  <!-- ANCESTRO: <div id="app-state-main" class="is-hidden"> -->
+  <!-- ANCESTRO: <main class="layout-split"> -->
+<section class="layout-split__gallery" aria-label="Galería fotográfica del predio">
                 <figure class="gallery-grid">
 
                     <div class="gallery-grid__track" aria-live="polite">
@@ -497,8 +80,12 @@ body {
                 </figure>
             </section>
 
-            <!-- Panel Derecho (40vw): Contenedor de información con degradado -->
-            <section class="layout-split__info venue-info" aria-label="Información del evento">
+--- <section> coincide con .venue-info (líneas 111-160) ---
+  <!-- ANCESTRO: <html lang="es"> -->
+  <!-- ANCESTRO: <body> -->
+  <!-- ANCESTRO: <div id="app-state-main" class="is-hidden"> -->
+  <!-- ANCESTRO: <main class="layout-split"> -->
+<section class="layout-split__info venue-info" aria-label="Información del evento">
 
                 <div class="venue-info__logo-wrapper">
                     <img src="assets/images/la_milonga.png" class="venue-info__logo" alt="Logo Chacra La Milonga"
@@ -549,11 +136,10 @@ body {
 
             </section>
 
-        </main>
-    </div><!-- /#app-state-main -->
-
-    <!-- Mutación: Inyección de panel de controles laterales absolutos -->
-    <nav class="comic-controls is-hidden" aria-label="Controles de navegación de la historieta">
+--- <nav> coincide con .comic-controls (líneas 166-183) ---
+  <!-- ANCESTRO: <html lang="es"> -->
+  <!-- ANCESTRO: <body> -->
+<nav class="comic-controls is-hidden" aria-label="Controles de navegación de la historieta">
         <button class="comic-btn comic-btn--prev" type="button" aria-label="Viñeta anterior">
             <svg class="comic-btn-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
                 <polyline points="15 18 9 12 15 6" />
@@ -571,67 +157,868 @@ body {
             </svg>
         </button>
     </nav>
-</body>
-
-</html>
 
 === CSS (reglas relevantes) ===
-### css/layout.css
-/* css/layout.css — Arquitectura Split-Screen (Desktop) / Stacking (Mobile) */
+### css/components/gallery.css
+/* css/components/gallery.css — Galería fotográfica inmersiva (Grid + cinemática) */
 
-/*
- * Mobile-first (Viewport < 1024px):
- * Flujo de bloque estándar (Stacking).
- * Galería en el tercio superior, seguido del panel de información.
- */
-body {
+/* ─── Matriz de Grilla para Galería ─────────────────────────────────────── */
+.gallery-grid {
+    width: 100%;
+    height: 100%;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    grid-template-rows: 1fr auto 1fr;
+    column-gap: 30px;
+    row-gap: 18px;
+    align-items: center;
+    justify-items: center;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: transparent;
+}
+
+/* ─── Track: Bounding Box para proporciones fotográficas ─────────────────── */
+.gallery-grid__track {
+    grid-column: 2;
+    grid-row: 2;
     position: relative;
-    background-color: var(--color-cream-bg);
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    width: 90%;
+    max-width: 1200px;
+    height: auto;
 }
 
-/* ─── Capa de fondo global (vi-0: portada) ───────────────────────────────────
- * Pseudo-elemento fijo proyectado sobre el viewport detrás del contenido.
- * z-index: 0 → Fondo real, no superposición.
- * pointer-events: none → Anulación de intercepción de matriz de eventos.
- * ─────────────────────────────────────────────────────────────────────────── */
-body::before {
-    opacity: 1;
-    content: '';
-    position: fixed;
-    inset: 0;
-    z-index: -1;
-    pointer-events: none;
-    background-image: url('../assets/images/vi-0-web.webp');
-    background-repeat: repeat;
-    background-size: auto;
-    background-position: top left;
-    opacity: var(--pattern-opacity);
-    /* mix-blend-mode: multiply; */
-}
-
-@media (max-width: 1023px) {
-body::before {
-        inset: -50%;
-        transform: scale(0.5);
+@media (min-width: 768px) {
+.gallery-grid__track {
+        gap: 32px;
     }
 }
 
-body>* {
+/* ─── Cinemática de Extrusión y Desplazamiento ───────────────────────────── */
+.gallery-grid__slide {
+    width: 100%;
+    height: 100%;
+    aspect-ratio: 3/2;
+    object-fit: cover;
+    display: block;
     position: relative;
-    z-index: 1;
+    opacity: 1;
+    box-shadow: 0 8px 35px 3px rgba(0, 0, 0, 0.59);
+    cursor: pointer;
 }
 
+.gallery-grid__zoom {
+    position: absolute;
+    inset: 0;
+    z-index: 200;
+}
+
+.gallery-grid__zoom-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    box-shadow: 0 8px 35px 3px rgba(0, 0, 0, 0.59);
+}
+
+.gallery-grid__zoom-close {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(60, 60, 60, 0.75);
+    border-radius: 4px;
+    z-index: 210;
+    cursor: pointer;
+    transition: transform var(--transition-smooth);
+}
+
+.gallery-grid__zoom-close:hover,
+.gallery-grid__zoom-close:focus-visible {
+    transform: scale(1.1);
+    outline: none;
+}
+
+.gallery-grid__zoom-close-icon {
+    width: 22px;
+    height: 22px;
+    fill: none;
+    stroke: #FFFFFF;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    pointer-events: none;
+}
+
+@media (orientation: landscape) and (width: 874px) and (height: 402px) {
+.gallery-grid__track {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 14px;
+    }
+}
+
+@media (orientation: landscape) and (width: 874px) and (height: 402px) {
+.gallery-grid__slide {
+        height: 88px;
+    }
+}
+
+### css/components/info-panel.css
+/* css/components/info-panel.css — Panel de información del evento (venue-info) */
+
+/* ─── Contenedor principal del panel derecho ─────────────────────────────── */
+.venue-info {
+    /* background-color: var(--color-panel-right); */
+    background: linear-gradient(to right, #c28e58, transparent) height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    padding: var(--space-48) var(--space-32) var(--space-48) var(--space-24);
+    gap: var(--space-32);
+    font-family: var(--font-primary);
+    color: #5b4123;
+}
+
+@media (max-width: 1023px) {
+.venue-info {
+        gap: 0;
+    }
+}
+
+/* ─── Máquina de Estados para Máscaras CSS ───────────────────────────────── */
+.venue-icon-mask {
+    display: inline-block;
+    background-color: #5b4123;
+    -webkit-mask-image: var(--icon-url);
+    mask-image: var(--icon-url);
+    -webkit-mask-size: contain;
+    mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    mask-position: center;
+}
+
+/* ─── Logo principal del venue ───────────────────────────────────────────── */
+.venue-info__logo-wrapper {
+    margin-bottom: var(--space-16);
+    width: 100%;
+    max-width: 480px;
+    display: flex;
+    justify-content: center;
+}
+
+.venue-info__logo {
+    width: 240px;
+    height: auto;
+    max-height: 150px;
+    object-fit: contain;
+}
+
+@media (max-width: 1023px) {
+.venue-info__logo-wrapper {
+        margin-top: 55px;
+    }
+}
+
+@media (max-width: 1023px) {
+.venue-info__logo {
+        width: 156px;
+    }
+}
+
+/* ─── Contenedor de cuerpo (Alineación estructurada) ─────────────────────── */
+.venue-info__body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-24);
+    width: 100%;
+    max-width: 480px;
+}
+
+/* ─── Bloque de acciones (links + formulario) — Mobile: 2 columnas ───────── */
+.venue-info__actions {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-16);
+    width: 100%;
+    max-width: 480px;
+}
+
+@media (max-width: 1023px) {
+.venue-info__actions {
+        margin-top: 30px;
+    }
+}
+
+@media (min-width: 1024px) {
+.venue-info__actions {
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: flex-start;
+        gap: var(--space-32);
+    }
+}
+
+/* ─── Dirección postal ───────────────────────────────────────────────────── */
+.venue-info__address {
+    font-size: var(--text-base);
+    text-align: center;
+    line-height: 1.6;
+    margin: 0;
+}
+
+@media (max-width: 1023px) {
+.venue-info__address {
+        font-size: calc(var(--text-base) * 1.13);
+        line-height: 1.35;
+    }
+}
+
+/* ─── Navegación y Enlaces ───────────────────────────────────────────────── */
+.venue-info__links {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-24);
+    width: 100%;
+}
+
+.venue-link {
+    display: flex;
+    align-items: center;
+    gap: var(--space-16);
+    text-decoration: none;
+    color: inherit;
+    font-size: var(--text-base);
+    transition: opacity var(--transition-smooth);
+}
+
+.venue-link:hover,
+.venue-link:focus-visible {
+    opacity: 0.7;
+    outline: none;
+}
+
+.venue-link__icon {
+    width: 26px;
+    height: 26px;
+    flex-shrink: 0;
+}
+
+/* ─── Separador decorativo ───────────────────────────────────────────────── */
+.venue-info__divider {
+    width: 1px;
+    height: 126px;
+    align-self: flex-start;
+    border: none;
+    border-right: 1px solid var(--color-divider);
+    margin: 0;
+}
+
+@media (min-width: 1024px) {
+.venue-info__divider {
+        width: 200px;
+        height: auto;
+        align-self: auto;
+        border-right: none;
+        border-bottom: 1px solid var(--color-divider);
+    }
+}
+
+/* ─── Call to Action (Formulario) ────────────────────────────────────────── */
+.venue-info__form-section {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-16);
+    text-align: left;
+    line-height: 1.4;
+}
+
+@media (max-width: 1023px) {
+.venue-info__form-section {
+        align-items: center;
+        text-align: center;
+    }
+}
+
+.venue-form-btn span {
+    font-size: var(--text-lg);
+    line-height: 1.4;
+    text-align: left;
+}
+
+.venue-form-btn {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: var(--space-16);
+    padding: 0;
+    transition: transform var(--transition-smooth);
+}
+
+.venue-form-btn__icon {
+    width: 26px;
+    height: 26px;
+    flex-shrink: 0;
+}
+
+@media (max-width: 1023px) {
+.venue-form-btn {
+        flex-direction: column-reverse;
+        align-items: center;
+        gap: 16px;
+    }
+}
+
+@media (max-width: 1023px) {
+.venue-form-btn span {
+        text-align: center;
+        max-width: 110px;
+        margin: 0 auto;
+        font-size: calc(var(--text-lg) * 0.92);
+        line-height: 1.25;
+    }
+}
+
+@media (max-width: 1023px) {
+.venue-form-btn__icon {
+        width: 36px;
+        height: 36px;
+    }
+}
+
+.venue-form-btn:hover,
+.venue-form-btn:focus-visible {
+    transform: scale(1.15);
+    outline: none;
+}
+
+@media (orientation: landscape) and (width: 874px) and (height: 402px) {
+.venue-info {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        padding: var(--space-16);
+        gap: var(--space-16);
+    }
+}
+
+@media (orientation: landscape) and (width: 874px) and (height: 402px) {
+.venue-info__body {
+        flex: 0 0 30%;
+        gap: 8px;
+        max-width: none;
+    }
+}
+
+@media (orientation: landscape) and (width: 874px) and (height: 402px) {
+.venue-info__logo-wrapper {
+        margin-top: 0;
+        margin-bottom: 0;
+    }
+}
+
+@media (orientation: landscape) and (width: 874px) and (height: 402px) {
+.venue-info__logo {
+        width: 100%;
+        max-width: 125px;
+        max-height: none;
+    }
+}
+
+@media (orientation: landscape) and (width: 874px) and (height: 402px) {
+.venue-info__address {
+        font-size: calc(var(--text-base) * 0.9);
+        line-height: 1.2;
+        text-align: left;
+    }
+}
+
+@media (orientation: landscape) and (width: 874px) and (height: 402px) {
+.venue-info__actions {
+        flex: 1 1 70%;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: 0;
+        gap: var(--space-16);
+        max-width: none;
+    }
+}
+
+@media (orientation: landscape) and (width: 874px) and (height: 402px) {
+.venue-info__links {
+        flex: 0 0 57%;
+        flex-direction: column;
+        gap: 14px;
+    }
+}
+
+@media (orientation: landscape) and (width: 874px) and (height: 402px) {
+.venue-info__divider {
+        width: 1px;
+        height: 70px;
+        align-self: center;
+        border-right: 1px solid var(--color-divider);
+        border-bottom: none;
+    }
+}
+
+@media (orientation: landscape) and (width: 874px) and (height: 402px) {
+.venue-info__form-section {
+        flex: 0 0 40%;
+        align-items: flex-start;
+        text-align: left;
+    }
+}
+
+@media (orientation: landscape) and (width: 874px) and (height: 402px) {
+.venue-form-btn {
+        max-width: 190px;
+        padding: 10px 14px;
+        flex-direction: row;
+    }
+}
+
+### css/layout.css
+/* Galería: tercio superior en Mobile */
+.layout-split__gallery {
+    width: 100%;
+    height: 33.333vh;
+    overflow: hidden;
+}
+
+/* Panel de información: flujo debajo de la galería en Mobile */
+.layout-split__info {
+    width: 100%;
+    padding: var(--space-32) var(--space-24);
+}
+
+@media (min-width: 1024px) {
+.layout-split__gallery {
+        width: 60vw;
+        height: 100vh;
+    }
+}
+
+@media (min-width: 1024px) {
+.layout-split__info {
+        width: 40vw;
+        height: 100vh;
+        padding: 0;
+        overflow: hidden;
+    }
+}
+
+/* ─── Utilidad de ocultación ─────────────────────────────────────────────── */
+.is-hidden {
+    display: none !important;
+}
+
+/* ─── Controles laterales de navegación ──────────────────────────────────────────── */
+.comic-controls {
+    position: fixed;
+    bottom: 12px;
+    left: 0;
+    width: 100%;
+    z-index: 999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 32px;
+}
+
+.comic-btn {
+    appearance: none;
+    -webkit-appearance: none;
+    border: none;
+    cursor: pointer;
+    background: transparent;
+    color: #5B4123;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: all;
+    transition: transform var(--transition-smooth), opacity var(--transition-smooth);
+    width: 64px;
+    height: 64px;
+    margin: 0;
+    /* Depuración de margen estático obsoleto */
+    opacity: 0.8;
+}
+
+.comic-btn--prev {
+}
+
+.comic-btn--next {
+}
+
+.comic-btn:hover,
+.comic-btn:focus-visible {
+    background: transparent;
+    opacity: 1;
+    transform: scale(1.15);
+    outline: none;
+}
+
+.comic-btn:disabled {
+    opacity: 0;
+    /* Mutación: Ocultamiento total en umbrales de navegación */
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.comic-btn-icon {
+    width: 48px;
+    /* Mutación: Escalamiento del vector */
+    height: 48px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.5;
+    /* Mutación: Reducción del peso del trazo */
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    pointer-events: none;
+}
+
+/* ─── Indicadores de posición (Dots) ─────────────────────────────────────────── */
+.comic-dots {
+    /* Centrado perfecto en la franja de 50px (18px de gap + 2px = 20px arriba del dot de 10px) */
+    /* Mutación: Depuración de anclajes absolutos; eje posicional delegado al Grid */
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    pointer-events: none;
+    z-index: 10;
+}
+
+/* ─── Botón Volver al Inicio ─────────────────────────────────────────────── */
+.btn-inicio {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    width: 24px;
+    height: 24px;
+    z-index: 200;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-inicio__icon {
+    width: 24px;
+    height: 24px;
+}
+
+@media (orientation: landscape) and (width: 874px) and (height: 402px) {
+.layout-split__gallery {
+        width: 100%;
+        height: 40%;
+    }
+}
+
+@media (orientation: landscape) and (width: 874px) and (height: 402px) {
+.layout-split__info {
+        width: 100%;
+        height: 60%;
+        padding: 0;
+        overflow: hidden;
+    }
+}
+
+@media (orientation: landscape) and (width: 874px) and (height: 402px) {
+.comic-controls {
+        bottom: 4px;
+        height: 28px;
+        gap: 12px;
+    }
+}
+
+@media (orientation: landscape) and (width: 874px) and (height: 402px) {
+.comic-dots {
+        gap: 8px;
+    }
+}
+
+@media (orientation: landscape) and (width: 874px) and (height: 402px) {
+.comic-btn {
+        width: 28px;
+        height: 28px;
+    }
+}
+
+@media (orientation: landscape) and (width: 874px) and (height: 402px) {
+.comic-btn-icon {
+        width: 18px;
+        height: 18px;
+    }
+}
+
+@media (orientation: landscape) and (width: 874px) and (height: 402px) {
+.btn-inicio {
+        width: 20px;
+        height: 20px;
+    }
+}
+
+@media (orientation: landscape) and (width: 874px) and (height: 402px) {
+.btn-inicio__icon {
+        width: 20px;
+        height: 20px;
+    }
+}
+
+=== JS (bloques relevantes) ===
+### js/main.js
+// --- imports del archivo ---
+import IntroController   from './modules/IntroController.js';
+import GalleryController from './modules/GalleryController.js';
+import MapHandler        from './modules/MapHandler.js';
+
+// …
+
+// --- líneas 7-19 ---
+const init = () => {
+    // ── Secuencia de introducción ──────────────────────────────────────────
+    new IntroController('#app-state-cover', '#app-state-intro', '#app-state-main', '.comic-track', '#btn-start-comic');
+
+    // ── Galería fotográfica ────────────────────────────────────────────────
+    const galleryElement = document.querySelector('.gallery-grid');
+    if (galleryElement) {
+        new GalleryController(galleryElement);
+    }
+
+    // ── Mapa ilustrativo (Suspendido temporalmente por carencia de nodos) ──
+    // new MapHandler('#btn-open-map', '#map-illustration');
+}
+
+### js/modules/GalleryController.js
+// --- líneas 3-46 ---
+class GalleryController {
+    /**
+     * @param {HTMLElement} rootElement - Elemento raíz de la galería (.gallery-grid)
+     */
+    constructor(rootElement) {
+        this._nodeRoot      = rootElement;
+        this._nodeTrack     = rootElement.querySelector('.gallery-grid__track');
+        this._nodeZoom      = rootElement.querySelector('.gallery-grid__zoom');
+        this._nodeZoomImg   = rootElement.querySelector('.gallery-grid__zoom-img');
+        this._nodeZoomClose = rootElement.querySelector('.gallery-grid__zoom-close');
+
+        if (!this._nodeTrack || !this._nodeZoom || !this._nodeZoomImg || !this._nodeZoomClose) {
+            console.warn('GalleryController: fallo en la resolución de nodos requeridos.');
+            return;
+        }
+
+        this._slides = Array.from(this._nodeTrack.querySelectorAll('.gallery-grid__slide'));
+        this._mapEvents();
+    }
+
+    // ── Mapeo de eventos ───────────────────────────────────────────────────
+    _mapEvents() {
+        this._slides.forEach((slide) => {
+            slide.addEventListener('click', () => this._openZoom(slide));
+        });
+
+        this._nodeZoomClose.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this._closeZoom();
+        });
+    }
+
+    // ── Abrir imagen ampliada ──────────────────────────────────────────────
+    _openZoom(slide) {
+        this._nodeZoomImg.src = slide.src;
+        this._nodeZoomImg.alt = slide.alt;
+        this._nodeZoom.classList.remove('is-hidden');
+    }
+
+    // ── Cerrar imagen ampliada ─────────────────────────────────────────────
+    _closeZoom() {
+        this._nodeZoom.classList.add('is-hidden');
+    }
+}
+
+### js/modules/IntroController.js
+// --- líneas 11-40 ---
+    constructor(coverSelector, introSelector, mainSelector, trackSelector, startBtnSelector) {
+        this._nodeCover    = document.querySelector(coverSelector);
+        this._nodeIntro    = document.querySelector(introSelector);
+        this._nodeMain     = document.querySelector(mainSelector);
+        this._nodeTrack    = document.querySelector(trackSelector);
+        this._nodeStartBtn = document.querySelector(startBtnSelector);
+
+        this._nodeBtnPrev  = document.querySelector('.comic-btn--prev');
+        this._nodeBtnNext  = document.querySelector('.comic-btn--next');
+        this._nodeDotsWrap = document.querySelector('.comic-dots'); // Mutación: Puntero al contenedor de dots
+        this._nodeBtnHome  = document.querySelector('#btn-go-home');
+        this._nodeBtnBackToLastComic = document.querySelector('#btn-back-to-last-comic');
+        this._nodeComicControls = document.querySelector('.comic-controls');
+        this._nodeComicZoom      = document.querySelector('.comic-zoom');
+        this._nodeComicZoomImg   = this._nodeComicZoom ? this._nodeComicZoom.querySelector('.gallery-grid__zoom-img') : null;
+        this._nodeComicZoomClose = this._nodeComicZoom ? this._nodeComicZoom.querySelector('.gallery-grid__zoom-close') : null;
+
+        if (!this._nodeCover || !this._nodeIntro || !this._nodeMain || !this._nodeTrack) {
+            console.warn('IntroController: fallo en la resolución de nodos requeridos.');
+            return;
+        }
+
+        this._slides      = Array.from(this._nodeTrack.querySelectorAll('.comic-slide'));
+        this._totalSlides = this._slides.length + 1;
+
+        this._currentIndex = 0;
+        this._buildDots();   // Mutación: Inyección dinámica del modelo de dots
+        this._renderState();
+        this._mapEvents();
+    }
+
+// …
+
+// --- líneas 108-117 ---
+        document.addEventListener('keydown', (e) => {
+            const introHidden = this._nodeIntro.classList.contains('is-hidden');
+            const mainHidden = this._nodeMain.classList.contains('is-hidden');
+            if (introHidden && mainHidden) return;
+            if (e.key === 'ArrowRight') {
+                this._goNext();
+            } else if (e.key === 'ArrowLeft') {
+                this._goPrev();
+            }
+        }
+
+// …
+
+// --- líneas 199-204 ---
+    _onStartClick() {
+        this._nodeCover.classList.add('is-hidden');
+        this._nodeIntro.classList.remove('is-hidden');
+        if (this._nodeBtnHome) this._nodeBtnHome.classList.remove('is-hidden');
+        if (this._nodeComicControls) this._nodeComicControls.classList.remove('is-hidden');
+    }
+
+// …
+
+// --- líneas 225-273 ---
+    _renderState() {
+        // Bugfix: solo se puede tocar la visibilidad de intro/main si el
+        // usuario ya arrancó el recorrido (cover oculto). Evita que la
+        // llamada inicial desde el constructor destape #app-state-intro
+        // antes de tocar el botón de inicio.
+        const introStarted = this._nodeCover.classList.contains('is-hidden');
+
+        if (this._currentIndex < this._slides.length) {
+            if (introStarted) {
+                this._nodeIntro.classList.remove('is-hidden');
+                this._nodeMain.classList.add('is-hidden');
+                if (this._nodeComicControls) this._nodeComicControls.classList.remove('comic-controls--main-state');
+            }
+            // Renderizado del track de imágenes
+            this._slides.forEach((slide, index) => {
+                slide.classList.remove('is-active', 'is-past');
+
+                if (index === this._currentIndex) {
+                    slide.classList.add('is-active');
+                } else if (index < this._currentIndex) {
+                    slide.classList.add('is-past');
+                }
+                // index > this._currentIndex → sin clase → translateX(150vw) por defecto CSS
+            });
+        } else if (this._currentIndex === this._slides.length) {
+            if (introStarted) {
+                this._nodeIntro.classList.add('is-hidden');
+                this._nodeMain.classList.remove('is-hidden');
+                if (this._nodeComicControls) this._nodeComicControls.classList.add('comic-controls--main-state');
+            }
+        }
+
+        // Mutación: Sincronización de estado de indicadores (dots)
+        if (this._dots) {
+            this._dots.forEach((dot, index) => {
+                const isActive = index === this._currentIndex;
+                dot.classList.toggle('is-active', isActive);
+                dot.setAttribute('aria-selected', isActive ? 'true' : 'false');
+            });
+        }
+
+        if (this._nodeBtnBackToLastComic) {
+            this._nodeBtnBackToLastComic.classList.toggle('is-hidden', this._nodeMain.classList.contains('is-hidden'));
+        }
+
+        if (this._nodeBtnNext) {
+            this._nodeBtnNext.disabled = (this._currentIndex === this._totalSlides - 1);
+        }
+    }
+
+// …
+
+// --- líneas 276-282 ---
+    _openComicZoom(slide) {
+        if (!this._nodeComicZoom || !this._nodeComicZoomImg) return;
+        this._nodeComicZoomImg.src = slide.src;
+        this._nodeComicZoomImg.alt = slide.alt;
+        this._nodeComicZoomImg.style.objectFit = 'contain';
+        this._nodeComicZoom.classList.remove('is-hidden');
+    }
+
+// …
+
+// --- líneas 284-287 ---
+    _closeComicZoom() {
+        if (!this._nodeComicZoom) return;
+        this._nodeComicZoom.classList.add('is-hidden');
+    }
+
+// …
+
+// --- líneas 290-295 ---
+    _transitionToCover() {
+        this._nodeIntro.classList.add('is-hidden');
+        this._nodeCover.classList.remove('is-hidden');
+        if (this._nodeBtnHome) this._nodeBtnHome.classList.add('is-hidden');
+        if (this._nodeComicControls) this._nodeComicControls.classList.add('is-hidden');
+    }
+
+// …
+
+// --- líneas 297-305 ---
+    _goHome() {
+        this._nodeMain.classList.add('is-hidden');
+        this._nodeIntro.classList.add('is-hidden');
+        this._nodeCover.classList.remove('is-hidden');
+        if (this._nodeBtnHome) this._nodeBtnHome.classList.add('is-hidden');
+        if (this._nodeComicControls) this._nodeComicControls.classList.add('is-hidden');
+        this._currentIndex = 0;
+        this._renderState();
+    }
+
 === REPORTE ===
-✔ _renderState @ js/modules/IntroController.js → js/modules/IntroController.js (archivo completo: 7)
-✔ constructor @ js/modules/IntroController.js → js/modules/IntroController.js (archivo completo: 1)
-✔ _onStartClick @ js/modules/IntroController.js → js/modules/IntroController.js (archivo completo: 2)
-✔ #app-state-cover @ index.html → index.html (archivo completo: 1)
-✔ #app-state-intro @ index.html → index.html (archivo completo: 1)
-✔ body @ css/reset.css → css/reset.css (archivo completo: 2)
-✔ body @ css/layout.css → css/layout.css (css: 4)
-✔ html @ css/reset.css → css/reset.css (archivo completo: 1)
-✔ js/modules/IntroController.js → incluido completo
-✔ css/reset.css → incluido completo
-✔ css/variables.css → incluido completo
-✔ css/typography.css → incluido completo
-✔ index.html → incluido completo
+✔ .layout-split__gallery → index.html (html: 1), css/layout.css (css: 3)
+✔ .gallery-grid__track → css/components/gallery.css (css: 3), js/modules/GalleryController.js (js: 1)
+✔ .gallery-grid__slide → css/components/gallery.css (css: 2), js/modules/GalleryController.js (js: 1)
+✔ .venue-info → index.html (html: 1), css/components/info-panel.css (css: 3)
+✔ .venue-info__logo-wrapper → css/components/info-panel.css (css: 3)
+✔ .venue-info__logo → css/components/info-panel.css (css: 3)
+✔ .venue-info__body → css/components/info-panel.css (css: 2)
+✔ .venue-info__address → css/components/info-panel.css (css: 3)
+✔ .venue-info__actions → css/components/info-panel.css (css: 4)
+✔ .venue-info__links → css/components/info-panel.css (css: 2)
+✔ .venue-info__form-section → css/components/info-panel.css (css: 3)
+✔ .venue-form-btn → css/components/info-panel.css (css: 6)
+✔ .comic-controls → index.html (html: 1), css/layout.css (css: 2), js/modules/IntroController.js (js: 3)
+✔ .comic-btn--prev → css/layout.css (css: 1), js/modules/IntroController.js (js: 1)
+✔ .comic-btn--next → css/layout.css (css: 1), js/modules/IntroController.js (js: 1)
+✔ .comic-dots → css/layout.css (css: 2), js/modules/IntroController.js (js: 1)
