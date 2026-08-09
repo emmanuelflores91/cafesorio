@@ -164,9 +164,9 @@ body>* {
     position: absolute;
     top: 15px;
     left: 15px;
-    max-width: 300px;
-    background-color: #f1d4a3;
-    border: 4px solid #000000;
+    max-width: 240px;
+    background-color: #fffb9d;
+    border: 2px solid #000000;
     font-family: 'Segoe Print', 'Comic Sans MS', cursive;
     text-transform: uppercase;
     text-align: center;
@@ -185,6 +185,37 @@ body>* {
 .comic-slide.is-past {
     transform: translateX(-150vw);
     z-index: 0;
+}
+
+@keyframes comic-ripple {
+    0% { transform: translate(-50%, -50%) scale(0.4); opacity: 0.75; }
+    100% { transform: translate(-50%, -50%) scale(1.8); opacity: 0; }
+}
+
+.comic-slide::before,
+.comic-slide::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    border: 2px solid rgba(248, 228, 181, 0.85);
+    transform: translate(-50%, -50%) scale(0.4);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 3;
+    animation: comic-ripple 2.4s ease-out infinite;
+}
+
+.comic-slide::after {
+    animation-delay: 1.2s;
+}
+
+.is-hidden .comic-slide::before,
+.is-hidden .comic-slide::after {
+    animation: none;
 }
 
 /* ─── Controles laterales de navegación ──────────────────────────────────────────── */
@@ -418,6 +449,34 @@ body>* {
     flex-shrink: 0;
     animation: cover-pulse 2s ease-in-out infinite;
     /* Mutación: bounce → pulse */
+}
+
+@keyframes cover-phone-rotate {
+    0%, 15% { transform: rotate(0deg); }
+    45%, 60% { transform: rotate(90deg); }
+    90%, 100% { transform: rotate(0deg); }
+}
+
+.cover-sequence__phone-hint {
+    position: absolute;
+    right: 16px;
+    bottom: 16px;
+    width: 28px;
+    height: 28px;
+    color: var(--color-brown-mid);
+    pointer-events: none;
+    z-index: 60;
+}
+
+.cover-sequence__phone-icon {
+    width: 100%;
+    height: 100%;
+    transform-origin: center;
+    animation: cover-phone-rotate 3.5s ease-in-out infinite;
+}
+
+.is-hidden .cover-sequence__phone-icon {
+    animation: none;
 }
 
 @keyframes cover-pulse {
