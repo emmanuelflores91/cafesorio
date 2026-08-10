@@ -179,17 +179,25 @@ body>* {
     z-index: 2;
 }
 
-/* Cartela ampliada del slide 1 — solo mobile (desktop usa .comic-slide__caption--slide-1) */
+/* Cartela mobile — aplica a todas las viñetas */
 @media (max-width: 1023px) {
-    .comic-slide:first-child .comic-slide__caption {
-        top: 15px;
-        left: clamp(-48px, -3.5%, 0px);
-        max-width: none;
-        width: min(360px, 78vw);
-        padding: 12px 18px;
-        font-size: clamp(0.75rem, 1.6vw, 0.95rem);
+    .comic-slide__caption {
+        top: auto;
+        bottom: calc(100% - 4px);
+        left: -7px;
+        width: 186px;
+        max-width: 100%;
+        padding: 3px 6px;
+        font-size: 12px;
         line-height: 1.25;
+        font-weight: 700;
+        border: 1px solid #000;
     }
+
+    .comic-slide__caption--slide-2 { width: 216px; }
+    .comic-slide__caption--slide-3 { width: 225px; }
+    .comic-slide__caption--slide-4 { width: 216px; }
+    .comic-slide__caption--slide-5 { width: 205px; }
 }
 
 /* Cartelas ampliadas (viñetas 1-3) — propiedades compartidas, solo desktop (≥1024px) */
@@ -313,6 +321,12 @@ body>* {
     justify-content: center;
     align-items: center;
     gap: 32px;
+}
+
+@media (max-width: 1023px) {
+    .comic-controls {
+        bottom: 112px;
+    }
 }
 
 
