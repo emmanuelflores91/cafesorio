@@ -38,7 +38,9 @@ class GalleryController {
         this._nodeZoomImg.alt = slide.alt;
         this._nodeZoom.classList.remove('is-hidden');
         requestAnimationFrame(() => {
-            this._nodeZoom.classList.add('is-visible');
+            requestAnimationFrame(() => {
+                this._nodeZoom.classList.add('is-visible');
+            });
         });
     }
 
