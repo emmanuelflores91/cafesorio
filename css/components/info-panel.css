@@ -17,6 +17,7 @@
 @media (max-width: 1023px) {
     .venue-info {
         gap: 0;
+        padding-top: 0;
     }
 }
 
@@ -52,7 +53,8 @@
 
 @media (max-width: 1023px) {
     .venue-info__logo-wrapper {
-        margin-top: 55px;
+        margin-top: -25px;
+        margin-bottom: 0;
     }
 
     .venue-info__logo {
@@ -113,8 +115,26 @@
 
 @media (max-width: 1023px) {
     .venue-info__address {
-        font-size: calc(var(--text-base) * 1.13);
+        font-size: calc(var(--text-base) * 0.95);
         line-height: 1.35;
+    }
+}
+
+@media (max-width: 1023px) and (max-height: 700px) and (orientation: portrait) {
+    .venue-info__logo {
+        width: 110px;
+    }
+
+    .venue-info__logo-wrapper {
+        margin-top: 2px;
+    }
+
+    .venue-info__address {
+        font-size: calc(var(--text-base) * 0.85);
+    }
+
+    .venue-info__actions {
+        margin-top: 12px;
     }
 }
 
@@ -145,6 +165,16 @@
     color: inherit;
     font-size: var(--text-base);
     transition: opacity var(--transition-smooth);
+}
+
+@media (max-width: 1023px) {
+    .venue-info__links {
+        gap: 14px;
+    }
+
+    .venue-link {
+        font-size: calc(var(--text-base) * 0.85);
+    }
 }
 
 .venue-link:hover,
@@ -228,7 +258,7 @@
         text-align: center;
         max-width: 110px;
         margin: 0 auto;
-        font-size: calc(var(--text-lg) * 0.92);
+        font-size: calc(var(--text-lg) * 0.75);
         line-height: 1.25;
     }
 
