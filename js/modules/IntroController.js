@@ -121,6 +121,8 @@ class IntroController {
         // Umbral mínimo de 50px para distinguir un swipe real de un tap;
         // si no se supera el umbral, no se interviene y el click de fallback
         // existente sobre _nodeTrack sigue manejando el tap normalmente.
+        const isPageZoomed = () => !!window.visualViewport && window.visualViewport.scale > 1.05;
+
         this._touchStartX = 0;
         this._touchStartY = 0;
         this._trackMultiTouch = false;
@@ -146,6 +148,8 @@ class IntroController {
                 if (e.touches.length === 0) this._trackMultiTouch = false;
                 return;
             }
+
+            if (isPageZoomed()) return;
 
             const touchEndX = e.changedTouches[0].screenX;
             const touchEndY = e.changedTouches[0].screenY;
@@ -210,6 +214,8 @@ class IntroController {
                 if (e.touches.length === 0) this._mainMultiTouch = false;
                 return;
             }
+
+            if (isPageZoomed()) return;
 
             const touchEndX = e.changedTouches[0].screenX;
             const touchEndY = e.changedTouches[0].screenY;
