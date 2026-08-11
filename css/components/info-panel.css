@@ -53,7 +53,7 @@
 
 @media (max-width: 1023px) {
     .venue-info__logo-wrapper {
-        margin-top: -25px;
+        margin-top: -8px;
         margin-bottom: 0;
     }
 
@@ -130,11 +130,12 @@
     }
 
     .venue-info__address {
-        font-size: calc(var(--text-base) * 0.85);
+        font-size: calc(var(--text-base) * 0.78);
+        margin-bottom: 9px;
     }
 
     .venue-info__actions {
-        margin-top: 12px;
+        margin-top: 0;
     }
 }
 

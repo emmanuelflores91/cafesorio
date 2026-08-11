@@ -325,7 +325,7 @@ body>* {
 
 @media (max-width: 1023px) {
     .comic-controls {
-        bottom: 112px;
+        bottom: 85px;
     }
 }
 
@@ -444,6 +444,14 @@ body>* {
     /* QA: centrado global de todos los textos hijos */
 }
 
+@media (max-width: 1023px) {
+    .cover-sequence__inner {
+        gap: 0.25rem;
+        padding: 0.5rem 0.75rem;
+        width: 96%;
+    }
+}
+
 /* Subtítulo superior — Arimo, mayúsculas, letter-spacing amplio */
 .cover-sequence__eyebrow {
     font-family: 'Arimo', sans-serif;
@@ -458,6 +466,10 @@ body>* {
     text-align: center;
 }
 
+.cover-sequence__lead {
+    font-size: calc(var(--text-base) * 0.9);
+}
+
 /* Separador horizontal */
 .cover-sequence__divider {
     width: 30%;
@@ -466,6 +478,12 @@ body>* {
     border-bottom: 1.5px solid rgba(91, 65, 35, 0.8);
     margin: 0 auto;
     /* QA morado: centrado absoluto */
+}
+
+@media (max-width: 1023px) {
+    .cover-sequence__divider {
+        margin: 1.25rem 0;
+    }
 }
 
 /* Título principal — Cormorant Garamond, tono azul verdoso */
@@ -480,6 +498,12 @@ body>* {
     text-align: center;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+}
+
+@media (max-width: 1023px) {
+    .cover-sequence__title {
+        font-size: 1.2rem;
+    }
 }
 
 /* Capitular: letra J de mayor escala visual */
@@ -510,6 +534,12 @@ body>* {
     -moz-osx-font-smoothing: grayscale;
 }
 
+@media (max-width: 1023px) {
+    .cover-sequence__subtitle {
+        font-size: 1.2rem;
+    }
+}
+
 /* Botón CTA — Arimo, mayúsculas, letter-spacing amplio */
 .cover-sequence__cta {
     display: flex;
@@ -531,6 +561,12 @@ body>* {
     /* Mutación: rgba sin herencia al nodo img — previo: #4a3c34 */
     text-align: center;
     transition: opacity 0.2s ease;
+}
+
+@media (max-width: 1023px) {
+    .cover-sequence__cta {
+        margin-top: 2rem;
+    }
 }
 
 .cover-sequence__cta:hover {
