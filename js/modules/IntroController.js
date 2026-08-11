@@ -123,9 +123,15 @@ class IntroController {
         // existente sobre _nodeTrack sigue manejando el tap normalmente.
         this._touchStartX = 0;
         this._touchStartY = 0;
+        this._trackMultiTouch = false;
         const SWIPE_THRESHOLD = 50;
 
         this._nodeTrack.addEventListener('touchstart', (e) => {
+            if (e.touches.length > 1) {
+                this._trackMultiTouch = true;
+                return;
+            }
+            this._trackMultiTouch = false;
             this._touchStartX = e.changedTouches[0].screenX;
             this._touchStartY = e.changedTouches[0].screenY;
         });
@@ -135,6 +141,11 @@ class IntroController {
 
         this._nodeTrack.addEventListener('touchend', (e) => {
             if (this._nodeComicZoom && !this._nodeComicZoom.classList.contains('is-hidden')) return;
+
+            if (this._trackMultiTouch) {
+                if (e.touches.length === 0) this._trackMultiTouch = false;
+                return;
+            }
 
             const touchEndX = e.changedTouches[0].screenX;
             const touchEndY = e.changedTouches[0].screenY;
@@ -167,6 +178,10 @@ class IntroController {
             }
         });
 
+        this._nodeTrack.addEventListener('touchcancel', () => {
+            this._trackMultiTouch = false;
+        });
+
         if (this._nodeComicZoomClose) {
             this._nodeComicZoomClose.addEventListener('click', (e) => {
                 e.stopPropagation();
@@ -178,13 +193,24 @@ class IntroController {
         // Swipe izquierda→derecha retrocede al estado anterior.
         this._mainTouchStartX = 0;
         this._mainTouchStartY = 0;
+        this._mainMultiTouch = false;
 
         this._nodeMain.addEventListener('touchstart', (e) => {
+            if (e.touches.length > 1) {
+                this._mainMultiTouch = true;
+                return;
+            }
+            this._mainMultiTouch = false;
             this._mainTouchStartX = e.changedTouches[0].screenX;
             this._mainTouchStartY = e.changedTouches[0].screenY;
         });
 
         this._nodeMain.addEventListener('touchend', (e) => {
+            if (this._mainMultiTouch) {
+                if (e.touches.length === 0) this._mainMultiTouch = false;
+                return;
+            }
+
             const touchEndX = e.changedTouches[0].screenX;
             const touchEndY = e.changedTouches[0].screenY;
             const deltaX = touchEndX - this._mainTouchStartX;
@@ -194,6 +220,10 @@ class IntroController {
                 e.stopPropagation();
                 this._goPrev();
             }
+        });
+
+        this._nodeMain.addEventListener('touchcancel', () => {
+            this._mainMultiTouch = false;
         });
     }
 

@@ -64,9 +64,13 @@
 
 @media (min-width: 1024px) {
     .venue-info__logo {
-        width: 350px;
+        width: 200px;
         max-height: 350px;
         transform: translate(-100px, -25px);
+    }
+
+    .venue-info__logo-wrapper {
+        margin-top: 45px;
     }
 }
 
@@ -146,7 +150,7 @@
 
     .venue-info__address,
     .venue-info__actions {
-        transform: translate(-10px, -100px);
+        transform: translate(-10px, -62px);
     }
 }
 
