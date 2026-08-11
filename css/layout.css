@@ -171,7 +171,8 @@ body>* {
     max-width: 240px;
     background-color: #fffb9d;
     border: 3px solid #000;
-    font-family: 'Segoe Print', 'Comic Sans MS', cursive;
+    font-family: var(--font-comic);
+    font-style: italic;
     text-transform: uppercase;
     text-align: center;
     white-space: normal;
@@ -185,7 +186,7 @@ body>* {
         top: auto;
         bottom: calc(100% - 4px);
         left: -7px;
-        width: 186px;
+        width: 139px;
         max-width: 100%;
         padding: 3px 6px;
         font-size: 12px;
@@ -194,10 +195,10 @@ body>* {
         border: 1px solid #000;
     }
 
-    .comic-slide__caption--slide-2 { width: 216px; }
-    .comic-slide__caption--slide-3 { width: 225px; }
-    .comic-slide__caption--slide-4 { width: 216px; }
-    .comic-slide__caption--slide-5 { width: 205px; }
+    .comic-slide__caption--slide-2 { width: 186px; }
+    .comic-slide__caption--slide-3 { width: 190px; }
+    .comic-slide__caption--slide-4 { width: 185px; }
+    .comic-slide__caption--slide-5 { width: 174px; }
 }
 
 /* Cartelas ampliadas (viñetas 1-3) — propiedades compartidas, solo desktop (≥1024px) */
@@ -216,41 +217,40 @@ body>* {
 
     .comic-slide__caption--slide-1 {
         top: 10px;
-        left: -110px;
-        width: 336px;
+        left: max(-110px, calc((100% - 100vw) / 2 + 8px));
+        width: 278px;
         height: 114px;
         padding: 7px 0px;
     }
 
     .comic-slide__caption--slide-2 {
         top: 10px;
-        left: -110px;
-        width: 444px;
+        left: max(-110px, calc((100% - 100vw) / 2 + 8px));
+        width: 390px;
         height: 118px;
         padding: 7px 5px;
     }
 
     .comic-slide__caption--slide-3 {
         top: 10px;
-        left: -190px;
-        width: 463px;
+        left: max(-110px, calc((100% - 100vw) / 2 + 8px));
+        width: 395px;
         height: 111px;
         padding: 8px 5px;
     }
 
     .comic-slide__caption--slide-4 {
         top: 10px;
-        left: auto;
-        right: -190px;
-        width: 444px;
+        left: max(-110px, calc((100% - 100vw) / 2 + 8px));
+        width: 395px;
         height: 113px;
         padding: 7px 0px;
     }
 
     .comic-slide__caption--slide-5 {
         top: 10px;
-        left: -110px;
-        width: 415px;
+        left: max(-110px, calc((100% - 100vw) / 2 + 8px));
+        width: 365px;
         height: 142px;
         padding: 7px 0px;
     }
