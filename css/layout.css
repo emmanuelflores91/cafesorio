@@ -153,8 +153,6 @@ body>* {
     transition: transform 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
     z-index: 0;
     border: none;
-    /* Mutación: +30% canal alfa (0.45→0.59), +10% expansión (35px blur, 3px spread) */
-    box-shadow: 0 8px 35px 3px rgba(0, 0, 0, 0.74);
 }
 
 .comic-slide-img {
@@ -162,98 +160,6 @@ body>* {
     height: 100%;
     object-fit: fill;
     display: block;
-}
-
-.comic-slide__caption {
-    position: absolute;
-    top: 15px;
-    left: 15px;
-    max-width: 240px;
-    background-color: #fffb9d;
-    border: 3px solid #000;
-    font-family: var(--font-comic);
-    font-style: italic;
-    text-transform: uppercase;
-    text-align: center;
-    white-space: normal;
-    padding: 16px 20px;
-    z-index: 2;
-}
-
-/* Cartela mobile — aplica a todas las viñetas */
-@media (max-width: 1023px) {
-    .comic-slide__caption {
-        top: auto;
-        bottom: calc(100% - 4px);
-        left: -7px;
-        width: 139px;
-        max-width: 100%;
-        padding: 3px 6px;
-        font-size: 12px;
-        line-height: 1.25;
-        font-weight: 700;
-        border: 1px solid #000;
-    }
-
-    .comic-slide__caption--slide-2 { width: 186px; }
-    .comic-slide__caption--slide-3 { width: 190px; }
-    .comic-slide__caption--slide-4 { width: 185px; }
-    .comic-slide__caption--slide-5 { width: 174px; }
-}
-
-/* Cartelas ampliadas (viñetas 1-3) — propiedades compartidas, solo desktop (≥1024px) */
-@media (min-width: 1024px) {
-    .comic-slide__caption--slide-1,
-    .comic-slide__caption--slide-2,
-    .comic-slide__caption--slide-3,
-    .comic-slide__caption--slide-4,
-    .comic-slide__caption--slide-5 {
-        max-width: none;
-        font-size: 25px;
-        line-height: 1.25;
-        font-style: italic;
-        font-weight: 700;
-    }
-
-    .comic-slide__caption--slide-1 {
-        top: 10px;
-        left: max(-110px, calc((100% - 100vw) / 2 + 8px));
-        width: 278px;
-        height: 114px;
-        padding: 7px 0px;
-    }
-
-    .comic-slide__caption--slide-2 {
-        top: 10px;
-        left: max(-110px, calc((100% - 100vw) / 2 + 8px));
-        width: 390px;
-        height: 118px;
-        padding: 7px 5px;
-    }
-
-    .comic-slide__caption--slide-3 {
-        top: 10px;
-        left: max(-110px, calc((100% - 100vw) / 2 + 8px));
-        width: 395px;
-        height: 111px;
-        padding: 8px 5px;
-    }
-
-    .comic-slide__caption--slide-4 {
-        top: 10px;
-        left: max(-110px, calc((100% - 100vw) / 2 + 8px));
-        width: 395px;
-        height: 113px;
-        padding: 7px 0px;
-    }
-
-    .comic-slide__caption--slide-5 {
-        top: 10px;
-        left: max(-110px, calc((100% - 100vw) / 2 + 8px));
-        width: 365px;
-        height: 142px;
-        padding: 7px 0px;
-    }
 }
 
 /* ─── Estado activo del slide (Viewport central) ──────────────────────────────── */
