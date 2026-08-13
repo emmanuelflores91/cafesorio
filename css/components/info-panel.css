@@ -279,19 +279,30 @@
     outline: none;
 }
 
-@media (orientation: landscape) and (width: 874px) and (height: 402px) {
+/* ─── Ajuste tablet (600–1023px): centrado y separación del logo ────────── */
+@media (min-width: 600px) and (max-width: 1023px) {
+    .venue-info {
+        align-items: center;
+    }
+
+    .venue-info__logo-wrapper {
+        margin-top: var(--space-16);
+    }
+}
+
+@media (orientation: landscape) and (max-width: 1023px) {
     .venue-info {
         display: grid;
-        grid-template-columns: 120px 1fr;
+        grid-template-columns: minmax(80px, 120px) 1fr;
         grid-template-rows: auto auto;
         align-items: center;
         justify-content: start;
-        padding: var(--space-16);
+        padding: 4px var(--space-16) var(--space-16);
         gap: 4px var(--space-16);
     }
 
     .venue-info__body {
-        grid-column: 1;
+        grid-column: 1 / 3;
         grid-row: 2;
         flex: 0 0 auto;
         gap: 8px;
@@ -319,11 +330,12 @@
 
     .venue-info__actions {
         grid-column: 2;
-        grid-row: 1 / 3;
+        grid-row: 1;
         flex-direction: row;
         align-items: center;
         justify-content: flex-start;
         margin-top: 0;
+        margin-left: var(--space-16);
         gap: var(--space-16);
         max-width: none;
     }

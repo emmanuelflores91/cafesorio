@@ -6,5 +6,11 @@ chacra-video-2.mp4
 chacra-video-3.mp4
 
 # ─── Scripts de utilidad y volcados de estado de compilación ───────────
-mostrar_contenido_v1.sh
+mostrar_contenido.js
 salida_proyecto.txt
+estructura_proyecto.txt
+elementos_web.md
+
+
+diff-cierre-responsive-v2.md
+diff-cierre-responsive-v3.md

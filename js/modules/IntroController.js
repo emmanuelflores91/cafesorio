@@ -24,6 +24,10 @@ class IntroController {
         this._nodeComicZoom      = document.querySelector('.comic-zoom');
         this._nodeComicZoomImg   = this._nodeComicZoom ? this._nodeComicZoom.querySelector('.gallery-grid__zoom-img') : null;
         this._nodeComicZoomClose = this._nodeComicZoom ? this._nodeComicZoom.querySelector('.gallery-grid__zoom-close') : null;
+        this._nodeComicFirstHint = this._nodeTrack ? this._nodeTrack.querySelector('.comic-slide--first .comic-slide__hint') : null;
+        this._comicHintTimer     = null;
+        this._nodeRotateHint     = document.querySelector('.rotate-hint');
+        this._nodeRotateHintBtn  = document.querySelector('.rotate-hint__btn');
 
         if (!this._nodeCover || !this._nodeIntro || !this._nodeMain || !this._nodeTrack) {
             console.warn('IntroController: fallo en la resolución de nodos requeridos.');
@@ -231,6 +235,23 @@ class IntroController {
         this._nodeMain.addEventListener('touchcancel', () => {
             this._mainMultiTouch = false;
         });
+
+        // Aviso de rotación en portada: cierre por botón o por salir de portrait+chico.
+        if (this._nodeRotateHintBtn && this._nodeRotateHint) {
+            this._nodeRotateHintBtn.addEventListener('click', () => {
+                this._nodeRotateHint.classList.add('is-hidden');
+            });
+
+            const rotateHintQuery = window.matchMedia('(orientation: portrait) and (max-width: 480px)');
+            const handleRotateHintQueryChange = (e) => {
+                if (!e.matches) this._nodeRotateHint.classList.add('is-hidden');
+            };
+            if (rotateHintQuery.addEventListener) {
+                rotateHintQuery.addEventListener('change', handleRotateHintQueryChange);
+            } else if (rotateHintQuery.addListener) {
+                rotateHintQuery.addListener(handleRotateHintQueryChange);
+            }
+        }
     }
 
     // ── Handler: clic en #btn-start-comic ─────────────────────────────────
@@ -239,6 +260,12 @@ class IntroController {
         this._nodeIntro.classList.remove('is-hidden');
         if (this._nodeBtnHome) this._nodeBtnHome.classList.remove('is-hidden');
         if (this._nodeComicControls) this._nodeComicControls.classList.remove('is-hidden');
+
+        if (this._nodeComicFirstHint && !this._comicHintTimer) {
+            this._comicHintTimer = setTimeout(() => {
+                this._nodeComicFirstHint.classList.add('is-hidden');
+            }, 6000);
+        }
     }
 
     // ── Transición direccional inversa ─────────────────────────────────────────
@@ -323,6 +350,12 @@ class IntroController {
     // ── Zoom de viñeta a pantalla completa (double-tap) ─────────────────────
     _openComicZoom(slide) {
         if (!this._nodeComicZoom || !this._nodeComicZoomImg) return;
+
+        if (this._nodeComicFirstHint && slide.classList.contains('comic-slide--first')) {
+            this._nodeComicFirstHint.classList.add('is-hidden');
+            clearTimeout(this._comicHintTimer);
+        }
+
         const imgNode = slide.tagName === 'IMG' ? slide : slide.querySelector('img');
         if (!imgNode) return;
         this._nodeComicZoomImg.src = imgNode.src;

@@ -59,6 +59,14 @@
                 <line x1="11" y1="18" x2="13" y2="18" stroke="currentColor" stroke-width="1.5"/>
             </svg>
         </div>
+        <div class="rotate-hint" id="rotate-hint" aria-label="Sugerencia de orientación">
+            <svg class="rotate-hint__icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <rect x="7" y="2" width="10" height="20" rx="2" ry="2" fill="none" stroke="currentColor" stroke-width="1.5"/>
+                <line x1="11" y1="18" x2="13" y2="18" stroke="currentColor" stroke-width="1.5"/>
+            </svg>
+            <p class="rotate-hint__text">Si podés, girá el celu para una mejor experiencia</p>
+            <button type="button" class="rotate-hint__btn">Continuar</button>
+        </div>
     </section>
 
 
@@ -66,8 +74,15 @@
     <section id="app-state-intro" class="comic-sequence is-hidden">
 
         <div class="comic-track">
-            <div class="comic-slide is-active">
+            <div class="comic-slide is-active comic-slide--first">
                 <img class="comic-slide-img" src="assets/images/vi-1-web-nv.webp" alt="Viñeta 1 de 5" draggable="false">
+                <div class="comic-slide__hint" aria-hidden="true">
+                    <span class="comic-slide__hint-pinch">
+                        <span class="comic-slide__hint-dot comic-slide__hint-dot--a"></span>
+                        <span class="comic-slide__hint-dot comic-slide__hint-dot--b"></span>
+                    </span>
+                    <span class="comic-slide__hint-text">Pellizcá para acercar</span>
+                </div>
             </div>
             <div class="comic-slide">
                 <img class="comic-slide-img" src="assets/images/vi-2-web-nv.webp" alt="Viñeta 2 de 5" draggable="false">

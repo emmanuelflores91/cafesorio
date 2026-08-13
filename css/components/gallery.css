@@ -117,7 +117,7 @@
 .gallery-grid__zoom-img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
     display: block;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
     transform: scale(0.9);
@@ -161,7 +161,7 @@
     pointer-events: none;
 }
 
-@media (orientation: landscape) and (width: 874px) and (height: 402px) {
+@media (orientation: landscape) and (max-width: 1023px) {
     .gallery-grid__track {
         grid-template-columns: repeat(4, 1fr);
         gap: 8px;
@@ -169,7 +169,7 @@
     }
 
     .gallery-grid__slide {
-        height: 110px;
-        object-fit: contain;
+        height: clamp(70px, 22vh, 130px);
+        object-fit: cover;
     }
 }
