@@ -166,16 +166,16 @@ body>* {
 }
 
 /* ─── Hint de pinch-zoom (solo primera viñeta) ────────────────────────────
- * Posición ajustable: la cartela horneada de la viñeta 1 está arriba a la
- * izquierda y la pareja en el centro-abajo, por eso se ancla en la esquina
- * inferior derecha (mismo patrón que .cover-sequence__phone-hint). Para
- * reubicarlo alcanza con cambiar right/bottom. El zoom real es el pinch
- * nativo del navegador (visualViewport) — este ícono es solo informativo.
+ * Posición ajustable: se ancla debajo de la imagen (fuera de la cartela y
+ * de la pareja horneadas en la viñeta 1), alineado al margen derecho, para
+ * no taparla. Para reubicarlo alcanza con cambiar right/bottom. El zoom
+ * real es el pinch nativo del navegador (visualViewport) — este ícono es
+ * solo informativo.
  * ────────────────────────────────────────────────────────────────────── */
 .comic-slide__hint {
     position: absolute;
-    right: 16px;
-    bottom: 16px;
+    right: 0;
+    bottom: -36px;
     display: flex;
     align-items: center;
     gap: 0.5em;
@@ -241,10 +241,6 @@ body>* {
 }
 
 @media (min-width: 1024px) {
-    .cover-sequence__phone-hint {
-        display: none;
-    }
-
     .comic-slide__hint {
         display: none;
     }
@@ -536,28 +532,6 @@ body>* {
     90%, 100% { transform: rotate(0deg); }
 }
 
-.cover-sequence__phone-hint {
-    position: absolute;
-    right: 16px;
-    bottom: 16px;
-    width: 28px;
-    height: 28px;
-    color: var(--color-brown-mid);
-    pointer-events: none;
-    z-index: 60;
-}
-
-.cover-sequence__phone-icon {
-    width: 100%;
-    height: 100%;
-    transform-origin: center;
-    animation: cover-phone-rotate 3.5s ease-in-out infinite;
-}
-
-.is-hidden .cover-sequence__phone-icon {
-    animation: none;
-}
-
 /* ─── Aviso de rotación (banner NO bloqueante, solo celular en portrait) ──
  * A propósito NO usa position:fixed;inset:0 a pantalla completa: se ancla
  * arriba y no cubre el CTA ni el resto de la portada, para que la web siga
@@ -575,12 +549,20 @@ body>* {
     flex-wrap: wrap;
     gap: var(--space-16);
     padding: var(--space-16) var(--space-24);
-    background-color: rgba(59, 42, 26, 0.88);
+    background-color: rgba(59, 42, 26, 0.44);
 }
 
 @media (orientation: portrait) and (max-width: 480px) {
     .rotate-hint {
         display: flex;
+    }
+
+    /* Empuja el bloque de portada hacia abajo para que no quede pegado
+     * al banner fijo de arriba. La centrado vertical de .cover-sequence
+     * absorbe la mitad del padding agregado, por eso el valor es
+     * aproximadamente el doble de la separación visual buscada. */
+    .cover-sequence__inner {
+        padding-top: 72px;
     }
 }
 
@@ -710,10 +692,6 @@ body>* {
         padding: 0.5rem 1rem;
         max-height: 100%;
         overflow-y: auto;
-    }
-
-    .cover-sequence__phone-hint {
-        display: none;
     }
 
     .cover-sequence__title,

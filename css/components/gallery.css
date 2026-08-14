@@ -30,44 +30,6 @@
     height: auto;
 }
 
-@keyframes gallery-ripple {
-    0% { transform: translate(-50%, -50%) scale(0.4); opacity: 0.75; }
-    100% { transform: translate(-50%, -50%) scale(1.8); opacity: 0; }
-}
-
-.gallery-grid__track::before,
-.gallery-grid__track::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 64px;
-    height: 64px;
-    border-radius: 50%;
-    border: 2px solid rgba(248, 228, 181, 0.85);
-    transform: translate(-50%, -50%) scale(0.4);
-    opacity: 0;
-    pointer-events: none;
-    z-index: 3;
-    animation: gallery-ripple 2.4s ease-out infinite;
-}
-
-.gallery-grid__track::after {
-    animation-delay: 1.2s;
-}
-
-.is-hidden .gallery-grid__track::before,
-.is-hidden .gallery-grid__track::after {
-    animation: none;
-}
-
-@media (min-width: 1024px) {
-    .gallery-grid__track::before,
-    .gallery-grid__track::after {
-        animation: none;
-    }
-}
-
 @media (min-width: 768px) {
     .gallery-grid__track {
         gap: 32px;
@@ -117,7 +79,7 @@
 .gallery-grid__zoom-img {
     width: 100%;
     height: 100%;
-    object-fit: contain;
+    object-fit: cover;
     display: block;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
     transform: scale(0.9);
@@ -171,5 +133,35 @@
     .gallery-grid__slide {
         height: clamp(70px, 22vh, 130px);
         object-fit: cover;
+    }
+
+    /* ─── Zoom del venue como overlay fullscreen (:not(.comic-zoom) excluye
+     * el zoom de las viñetas, que reutiliza estas mismas clases) ────────── */
+    .gallery-grid__zoom:not(.comic-zoom) {
+        position: fixed;
+        inset: 0;
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 6vh 6vw;
+        background-color: rgba(20, 14, 8, 0.78);
+    }
+
+    .gallery-grid__zoom:not(.comic-zoom) .gallery-grid__zoom-img {
+        width: auto;
+        height: auto;
+        max-width: 92vw;
+        max-height: 84vh;
+        object-fit: contain;
+        transform: scale(1);
+    }
+
+    .gallery-grid__zoom:not(.comic-zoom) .gallery-grid__zoom-close {
+        top: 16px;
+        left: 16px;
+        width: 44px;
+        height: 44px;
+        z-index: 1010;
     }
 }
