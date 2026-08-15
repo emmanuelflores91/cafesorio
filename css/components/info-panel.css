@@ -345,19 +345,29 @@
     }
 }
 
+/* ─── Landscape mobile/tablet: riel centrado de dos columnas ──────────────
+ * Antes: columna 2 en `1fr` (crecía con el viewport), actions empujado por
+ * `margin-left: clamp(2rem, 6vw, 4rem)`, links en `flex: 0 0 40%` de esa
+ * columna elástica, y seis transforms compensando el corrimiento (más otro
+ * bloque de transforms mágicos a partir de 800px). Todo eso escalaba con el
+ * ancho, por eso los elementos se separaban.
+ * Ahora: dos columnas que abrazan su contenido, el par centrado con
+ * `justify-content: center`, y anchos internos acotados. El grupo mide casi
+ * lo mismo a 584px que a 1014px: solo cambia el aire a los costados.
+ * ────────────────────────────────────────────────────────────────────── */
 @media (orientation: landscape) and (max-width: 1023px) {
     .venue-info {
         display: grid;
-        grid-template-columns: minmax(80px, 120px) 1fr;
+        grid-template-columns: auto auto;
         grid-template-rows: auto auto;
         align-items: center;
-        justify-content: start;
+        justify-content: center;
         padding: 4px var(--space-16) var(--space-16);
-        gap: 4px var(--space-16);
+        gap: 4px 12px;
     }
 
     .venue-info__body {
-        grid-column: 1 / 3;
+        grid-column: 1;
         grid-row: 2;
         flex: 0 0 auto;
         gap: 8px;
@@ -369,7 +379,6 @@
         grid-row: 1;
         margin-top: 0;
         margin-bottom: 0;
-        transform: translate(56px, -5px);
     }
 
     .venue-info__logo {
@@ -383,26 +392,25 @@
         line-height: 1.2;
         text-align: center;
         width: max-content;
-        transform: translate(47px, -27px);
     }
 
     .venue-info__actions {
         grid-column: 2;
-        grid-row: 1;
+        grid-row: 1 / 3;
         flex-direction: row;
         align-items: center;
-        justify-content: flex-start;
+        justify-content: center;
         margin-top: 0;
-        margin-left: clamp(2rem, 6vw, 4rem);
         gap: var(--space-16);
-        max-width: none;
+        max-width: 400px;
     }
 
+    /* Ancho propio en vez de un % de la columna: solo se comprime por
+     * debajo de ~565px de viewport, donde el riel ya no entraría. */
     .venue-info__links {
-        flex: 0 0 40%;
+        flex: 0 0 clamp(140px, 27vw, 152px);
         flex-direction: column;
         gap: 14px;
-        transform: translate(41px, 15px);
     }
 
     .venue-info__divider {
@@ -411,14 +419,12 @@
         align-self: center;
         border-right: 1px solid var(--color-divider);
         border-bottom: none;
-        transform: translate(-1px, 10px);
     }
 
     .venue-info__form-section {
-        flex: 1 1 auto;
+        flex: 0 1 auto;
         align-items: flex-start;
         text-align: left;
-        transform: translate(-20px, 14px);
     }
 
     .venue-form-btn {
@@ -430,20 +436,5 @@
     .venue-form-btn__icon {
         width: 36px;
         height: 36px;
-        transform: translate(10px, 0px);
-    }
-}
-
-@media (orientation: landscape) and (min-width: 800px) and (max-width: 1023px) {
-    .venue-info__links {
-        transform: translate(123px, 15px);
-    }
-
-    .venue-info__logo-wrapper {
-        transform: translate(148px, -5px);
-    }
-
-    .venue-info__address {
-        transform: translate(138px, -27px);
     }
 }

@@ -218,4 +218,15 @@
         height: 44px;
         z-index: 1010;
     }
+
+    /* El nav .comic-controls es hermano de #app-state-main y `body > *` deja
+     * a cada uno en su propio stacking context; con z-index: 999 contra el 1
+     * de #app-state-main, ningún z-index interno del overlay puede superarlo.
+     * Por eso se lo neutraliza mientras el zoom del venue está abierto: se
+     * recupera al cerrar la foto. `:not(.comic-zoom)` mantiene intacto el
+     * zoom de las viñetas. */
+    body:has(.gallery-grid__zoom:not(.comic-zoom):not(.is-hidden)) .comic-controls {
+        visibility: hidden;
+        pointer-events: none;
+    }
 }
