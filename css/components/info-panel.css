@@ -124,6 +124,61 @@
     }
 }
 
+/* ─── Portrait mobile/tablet: riel único de 360px ─────────────────────────
+ * Logo, dirección, divider, links y formulario comparten el mismo ancho
+ * máximo y se centran sobre un solo eje al variar el ancho de pantalla.
+ * Va ANTES del bloque de poca altura para que ese siga compactando.
+ * ────────────────────────────────────────────────────────────────────── */
+@media (max-width: 1023px) and (orientation: portrait) {
+    /* La separación con el nav fijo la aporta el padding-bottom de
+     * .layout-split (--venue-nav-safe), no este padding suelto. */
+    .venue-info {
+        padding-bottom: 0;
+    }
+
+    .venue-info__logo-wrapper,
+    .venue-info__body,
+    .venue-info__actions {
+        width: min(100%, 360px);
+        max-width: 360px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .venue-info__logo-wrapper {
+        margin-top: 12px;
+        margin-bottom: 0;
+        justify-content: center;
+        transform: none;
+    }
+
+    .venue-info__address {
+        text-align: center;
+        transform: none;
+    }
+
+    .venue-info__actions {
+        display: grid;
+        grid-template-columns: minmax(130px, 180px) 1px minmax(130px, 180px);
+        column-gap: clamp(12px, 3vw, 20px);
+        justify-content: center;
+        align-items: center;
+    }
+
+    .venue-info__links {
+        grid-column: 1;
+    }
+
+    .venue-info__divider {
+        grid-column: 2;
+        justify-self: center;
+    }
+
+    .venue-info__form-section {
+        grid-column: 3;
+    }
+}
+
 @media (max-width: 1023px) and (max-height: 700px) and (orientation: portrait) {
     .venue-info__logo {
         width: 110px;

@@ -123,6 +123,60 @@
     pointer-events: none;
 }
 
+/* ─── Portrait mobile/tablet: presupuesto vertical del venue ──────────────
+ * Todo el reparto de alto vive acá para que se lea de una sola pasada.
+ * De arriba hacia abajo:
+ *   --venue-top       margen superior seguro (la galería nunca pega arriba)
+ *   [track]           la galería: el ÚNICO bloque que cede tamaño
+ *   --venue-block-h   logo + dirección + actions. El gap galería→logo es el
+ *                     margin-top: 12px del logo-wrapper, ya contado acá.
+ *   --venue-nav-safe  franja del nav fijo .comic-controls (bottom: 85px +
+ *                     64px de alto = 149px) + aire de separación.
+ *
+ * El alto del track sale de su ancho (slides con aspect-ratio 3/2), así que
+ * se lo topea con el alto que sobra después de las reservas:
+ *   altoTrack = (ancho - 16px) / 1.5 + 16px  →  ancho = alto * 1.5 - 8px
+ * ────────────────────────────────────────────────────────────────────── */
+@media (max-width: 1023px) and (orientation: portrait) {
+    .layout-split {
+        --venue-top: 16px;
+        --venue-block-h: 344px;
+        --venue-nav-safe: 168px;
+        padding-top: var(--venue-top);
+        padding-bottom: var(--venue-nav-safe);
+    }
+
+    /* Sin flex-grow: al crecer, la caja se inflaba, el track quedaba pegado
+     * arriba y el bloque inferior terminaba empujado detrás del nav. */
+    .layout-split__gallery {
+        height: auto;
+        flex: 0 0 auto;
+    }
+
+    /* Los gaps de la grilla envolvente restaban alto y ancho reales al track */
+    .gallery-grid {
+        column-gap: 0;
+        row-gap: 0;
+    }
+
+    .gallery-grid__track {
+        gap: 16px;
+        width: min(
+            calc(100vw - 24px),
+            calc((100dvh - var(--venue-top) - var(--venue-block-h) - var(--venue-nav-safe)) * 1.5 - 8px)
+        );
+    }
+}
+
+/* Poca altura: el bloque inferior ya se compacta en info-panel.css (logo
+ * 110px, dirección 0.78rem, actions sin margen superior), así que la galería
+ * recupera esa reserva. Reutiliza el breakpoint existente, no agrega uno. */
+@media (max-width: 1023px) and (max-height: 700px) and (orientation: portrait) {
+    .layout-split {
+        --venue-block-h: 270px;
+    }
+}
+
 @media (orientation: landscape) and (max-width: 1023px) {
     .gallery-grid__track {
         grid-template-columns: repeat(4, 1fr);
