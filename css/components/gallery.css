@@ -36,6 +36,33 @@
     }
 }
 
+/* ─── Desktop: la galería respeta la franja del nav fijo ──────────────────
+ * `.layout-split__gallery` mide 100vh completos, pero `.comic-controls` es
+ * fixed con `bottom: 12px` y botones de 64px: ocupa los últimos 76px del
+ * viewport. Con pantalla ancha y baja (p. ej. 1759×622) el track crecía por
+ * ancho hasta meterse detrás del nav, porque su alto sale de su ancho
+ * (slides con aspect-ratio 3/2) y nadie miraba el alto disponible.
+ * Dos reservas, ninguna por monitor:
+ *   - la fila inferior de la grilla nunca baja de --venue-nav-safe;
+ *   - el ancho del track se topea por el alto que queda libre:
+ *     altoTrack = (ancho - 32px) / 1.5 + 32px  →  ancho = alto * 1.5 - 16px
+ * El 36px descontado son los dos row-gap de 18px de .gallery-grid.
+ * ────────────────────────────────────────────────────────────────────── */
+@media (min-width: 1024px) {
+    .gallery-grid {
+        --venue-top: 16px;
+        --venue-nav-safe: 92px;
+        grid-template-rows: minmax(var(--venue-top), 1fr) auto minmax(var(--venue-nav-safe), 1fr);
+    }
+
+    .gallery-grid__track {
+        width: min(
+            90%,
+            calc((100dvh - var(--venue-top) - var(--venue-nav-safe) - 36px) * 1.5 - 16px)
+        );
+    }
+}
+
 /* ─── Cinemática de Extrusión y Desplazamiento ───────────────────────────── */
 .gallery-grid__slide {
     width: 100%;

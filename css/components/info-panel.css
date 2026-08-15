@@ -66,11 +66,18 @@
     .venue-info__logo {
         width: 200px;
         max-height: 350px;
-        transform: translate(-100px, -25px);
     }
 
+    /* Riel de 310px: el mismo ancho que .venue-info__address, con el
+     * desplazamiento del grupo aplicado al wrapper. Así el logo se centra
+     * sobre la dirección sin depender del ancho del panel (40vw). El
+     * `translate(-100px, ...)` anterior estaba calibrado para el panel a
+     * 480px y descentraba el logo apenas se angostaba el viewport. */
     .venue-info__logo-wrapper {
         margin-top: 45px;
+        width: 310px;
+        max-width: 310px;
+        transform: translate(-10px, -25px);
     }
 }
 
