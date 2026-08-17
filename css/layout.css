@@ -165,6 +165,76 @@ body>* {
     display: block;
 }
 
+/* ─── Zoom de viñeta en desktop (puntero fino) ───────────────────────────
+ * Los controles se inyectan desde IntroController.js y sólo existen cuando
+ * el puntero es fino; en táctil el pinch nativo sigue siendo el único zoom.
+ * El escalado se aplica a .comic-slide-img (no a .comic-slide, que ya usa
+ * transform para la transición del carrusel), por lo que los botones —
+ * hermanos de la imagen — quedan fijos respecto al marco.
+ * ────────────────────────────────────────────────────────────────────── */
+.comic-zoom-ctrl {
+    display: none;
+}
+
+/* any-hover/any-pointer (no hover/pointer): en Windows con pantalla táctil el
+ * dispositivo señalador *primario* se reporta como coarse aunque haya mouse,
+ * y la consulta primaria dejaba los controles en display:none. */
+@media (min-width: 1024px) and (any-hover: hover) and (any-pointer: fine) {
+    /* El marco conserva su tamaño y recorta lo que sobresale de la imagen */
+    .comic-slide {
+        overflow: hidden;
+    }
+
+    .comic-slide-img {
+        transform-origin: center center;
+        user-select: none;
+        -webkit-user-select: none;
+    }
+
+    .comic-slide-img.is-pannable {
+        cursor: grab;
+    }
+
+    .comic-slide-img.is-panning {
+        cursor: grabbing;
+    }
+
+    .comic-zoom-ctrl {
+        position: absolute;
+        right: 6px;
+        bottom: 16px;
+        display: flex;
+        gap: 6px;
+        z-index: 6;
+        flex-direction: column-reverse;
+    }
+
+    .comic-zoom-ctrl__btn {
+        width: 32px;
+        height: 32px;
+        padding: 0;
+        border: 1px solid rgba(248, 228, 181, 0.85);
+        border-radius: 6px;
+        background-color: rgba(91, 65, 35, 0.82);
+        color: #F8E4B5;
+        font-family: 'Arimo', sans-serif;
+        font-size: 1rem;
+        line-height: 1;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow:
+            0 2px 6px rgba(0, 0, 0, 0.35),
+            0 0 0 1px rgba(91, 65, 35, 0.45);
+    }
+
+    .comic-zoom-ctrl__btn:disabled {
+        opacity: 0.15;
+        cursor: default;
+    }
+}
+
 /* ─── Hint de pinch-zoom (solo primera viñeta) ────────────────────────────
  * Posición ajustable: se ancla debajo de la imagen (fuera de la cartela y
  * de la pareja horneadas en la viñeta 1), alineado al margen derecho, para

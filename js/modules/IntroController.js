@@ -1,5 +1,9 @@
 // js/modules/IntroController.js — Controlador de la secuencia de introducción
 
+// Niveles fijos de zoom de viñeta (desktop). Editar este array es suficiente
+// para cambiar los pasos: el primero es siempre el 100% y el último el máximo.
+const COMIC_ZOOM_LEVELS = [1, 1.5, 2, 2.5];
+
 class IntroController {
     /**
      * @param {string} coverSelector    - Selector CSS del nodo de estado cover   (ej. '#app-state-cover')
@@ -39,6 +43,7 @@ class IntroController {
 
         this._currentIndex = 0;
         this._buildDots();   // Mutación: Inyección dinámica del modelo de dots
+        this._buildComicZoom(); // Controles de zoom por viñeta (sólo desktop)
         this._renderState();
         this._mapEvents();
     }
@@ -60,6 +65,134 @@ class IntroController {
             this._nodeDotsWrap.appendChild(btn);
             this._dots.push(btn);
         }
+    }
+
+    // ── Zoom de viñeta en desktop ─────────────────────────────────────────
+    // Sólo se construye con puntero fino y hover disponible: en táctil no se
+    // inyecta ningún nodo y el pinch nativo del navegador queda intacto.
+    _buildComicZoom() {
+        this._zoomEntries = [];
+
+        // Debe coincidir con la media query de .comic-zoom-ctrl en layout.css.
+        if (!window.matchMedia('(min-width: 1024px) and (any-hover: hover) and (any-pointer: fine)').matches) return;
+
+        this._slides.forEach((slide) => {
+            const img = slide.querySelector('.comic-slide-img');
+            if (!img) return;
+
+            const wrap = document.createElement('div');
+            wrap.className = 'comic-zoom-ctrl';
+
+            const btnOut = document.createElement('button');
+            btnOut.type = 'button';
+            btnOut.className = 'comic-zoom-ctrl__btn comic-zoom-ctrl__btn--out';
+            btnOut.setAttribute('aria-label', 'Alejar viñeta');
+            btnOut.textContent = '−';
+
+            const btnIn = document.createElement('button');
+            btnIn.type = 'button';
+            btnIn.className = 'comic-zoom-ctrl__btn comic-zoom-ctrl__btn--in';
+            btnIn.setAttribute('aria-label', 'Acercar viñeta');
+            btnIn.textContent = '+';
+
+            wrap.appendChild(btnOut);
+            wrap.appendChild(btnIn);
+            slide.appendChild(wrap);
+
+            const entry = { slide, img, btnOut, btnIn, level: 0, x: 0, y: 0 };
+            this._zoomEntries.push(entry);
+
+            btnOut.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this._stepComicZoom(entry, -1);
+            });
+
+            btnIn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this._stepComicZoom(entry, 1);
+            });
+
+            this._bindComicPan(entry);
+            this._applyComicZoom(entry);
+        });
+    }
+
+    _stepComicZoom(entry, direction) {
+        const next = entry.level + direction;
+        if (next < 0 || next >= COMIC_ZOOM_LEVELS.length) return;
+        entry.level = next;
+        // Al volver al 100% se descarta cualquier desplazamiento previo.
+        if (next === 0) {
+            entry.x = 0;
+            entry.y = 0;
+        }
+        this._applyComicZoom(entry);
+    }
+
+    // Aplica escala + desplazamiento sobre la imagen, acotando el pan para que
+    // el marco nunca quede con zonas vacías, y sincroniza el estado de botones.
+    _applyComicZoom(entry) {
+        const scale = COMIC_ZOOM_LEVELS[entry.level];
+        const rect  = entry.slide.getBoundingClientRect();
+        const maxX  = Math.max(0, (rect.width  * (scale - 1)) / 2);
+        const maxY  = Math.max(0, (rect.height * (scale - 1)) / 2);
+
+        entry.x = Math.min(maxX, Math.max(-maxX, entry.x));
+        entry.y = Math.min(maxY, Math.max(-maxY, entry.y));
+
+        entry.img.style.transform = `translate(${entry.x}px, ${entry.y}px) scale(${scale})`;
+        entry.img.classList.toggle('is-pannable', scale > 1);
+
+        entry.btnOut.disabled = (entry.level === 0);
+        entry.btnIn.disabled  = (entry.level === COMIC_ZOOM_LEVELS.length - 1);
+    }
+
+    // Arrastre directo sin inercia; sólo habilitado por encima del 100%.
+    _bindComicPan(entry) {
+        let panning = false;
+        let startX = 0, startY = 0, originX = 0, originY = 0;
+
+        entry.img.addEventListener('pointerdown', (e) => {
+            if (e.pointerType === 'touch') return;
+            if (COMIC_ZOOM_LEVELS[entry.level] <= 1) return;
+            panning = true;
+            startX  = e.clientX;
+            startY  = e.clientY;
+            originX = entry.x;
+            originY = entry.y;
+            entry.img.classList.add('is-panning');
+            entry.img.setPointerCapture(e.pointerId);
+            e.preventDefault();
+        });
+
+        entry.img.addEventListener('pointermove', (e) => {
+            if (!panning) return;
+            entry.x = originX + (e.clientX - startX);
+            entry.y = originY + (e.clientY - startY);
+            this._applyComicZoom(entry);
+        });
+
+        const endPan = (e) => {
+            if (!panning) return;
+            panning = false;
+            entry.img.classList.remove('is-panning');
+            if (entry.img.hasPointerCapture(e.pointerId)) entry.img.releasePointerCapture(e.pointerId);
+        };
+
+        entry.img.addEventListener('pointerup', endPan);
+        entry.img.addEventListener('pointercancel', endPan);
+    }
+
+    // Reset de zoom y pan: se dispara antes de cualquier cambio de viñeta para
+    // que la navegación nunca quede bloqueada por el estado de zoom.
+    _resetComicZoom() {
+        if (!this._zoomEntries) return;
+        this._zoomEntries.forEach((entry) => {
+            entry.level = 0;
+            entry.x = 0;
+            entry.y = 0;
+            this._applyComicZoom(entry);
+        });
     }
 
     // ── Mapeo de eventos ───────────────────────────────────────────────────
@@ -288,6 +421,9 @@ class IntroController {
 
     // ── Motor de resolución de clases de estado CSS ────────────────────────
     _renderState() {
+        // Todo cambio de viñeta arranca desde 100% y sin desplazamiento.
+        this._resetComicZoom();
+
         // Bugfix: solo se puede tocar la visibilidad de intro/main si el
         // usuario ya arrancó el recorrido (cover oculto). Evita que la
         // llamada inicial desde el constructor destape #app-state-intro
@@ -377,6 +513,7 @@ class IntroController {
 
     // ── Mutación: Transición de estado global inversa (Intro → Cover) ──────────
     _transitionToCover() {
+        this._resetComicZoom();
         this._nodeIntro.classList.add('is-hidden');
         this._nodeCover.classList.remove('is-hidden');
         if (this._nodeBtnHome) this._nodeBtnHome.classList.add('is-hidden');

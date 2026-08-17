@@ -2,8 +2,7 @@
 
 /* ─── Contenedor principal del panel derecho ─────────────────────────────── */
 .venue-info {
-    /* background-color: var(--color-panel-right); */
-    background: linear-gradient(to right, #c28e58, transparent) height: 100%;
+    /* Sin fondo propio: el patrón de body::before queda continuo detrás del panel. */
     display: flex;
     flex-direction: column;
     align-items: flex-start;
